@@ -1,5 +1,7 @@
 #!/bin/sh
 
+__r = 0
+
 this_folder="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 if [ "$this_folder" == "" ]; then
     this_folder=$(dirname $(readlink -f $0))
@@ -15,9 +17,11 @@ docker run -d -p 8000:8000 --name $CONTAINER amazon/dynamodb-local
 _pwd=`pwd`
 cd $this_folder
 mocha --reporter spec
-echo "mocha outcopme: $?"
+__r=$?
+echo "mocha outcopme: $__r"
 cd $_pwd
 echo "...stopping db container..."
 docker stop $CONTAINER && docker rm $CONTAINER
 
-echo "...api test done."
+echo "...api test done. []"
+exit $__r
