@@ -19,10 +19,10 @@ _pwd=`pwd`
 cd $this_folder
 mocha --reporter spec
 __r=$?
-echo "mocha outcopme: $__r"
+
 cd $_pwd
 echo "...stopping db container..."
 docker stop $CONTAINER && docker rm $CONTAINER
 
-echo "...api test done. []"
+echo "...api test done. [$__r]"
 exit $__r
