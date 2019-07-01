@@ -1,11 +1,12 @@
 #!/bin/sh
 
-__r = 0
+__r=0
 
 this_folder="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-if [ "$this_folder" == "" ]; then
+if [ -z $this_folder ]; then
     this_folder=$(dirname $(readlink -f $0))
 fi
+echo "this_folder: $this_folder"
 parent_folder=$(dirname $this_folder)
 
 CONTAINER=dynamodb4test
