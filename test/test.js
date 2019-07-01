@@ -13,7 +13,7 @@ describe('#store', function() {
         done(null);
     });
 
-    it('no tables in the beginning', function(done) {
+    it('01 no tables in the beginning', function(done) {
 
         store.findTable(table, (e,r) => {
             if(e)
@@ -26,9 +26,9 @@ describe('#store', function() {
 
     });
 
-    it('1 table after creating one', function(done) {
+    it('02 1 table after creating one', function(done) {
 
-        store.createTable({table: table, rangeKey: 'dataspec', numKey: 'id'}, (e) => {
+        store.createTable(table,(e) => {
             if(e)
                 done(e);
             else {
@@ -45,7 +45,7 @@ describe('#store', function() {
 
     });
 
-    it('no objects there in the beginning', function(done) {
+    it('03 no objects there in the beginning', function(done) {
 
         store.getObjsCount(table, (e, r) => {
             if(e)
@@ -58,7 +58,7 @@ describe('#store', function() {
 
     });
 
-    it('1 object after adding one', function(done) {
+    it('04 1 object after adding one', function(done) {
 
         store.putObj(table,  {dataspec: "test-obj", id: 1, "field0": 23 } ,(e) => {
             if(e)
@@ -77,7 +77,7 @@ describe('#store', function() {
 
     });
 
-    it('2 objects after adding another one', function(done) {
+    it('#05 2 objects after adding another one', function(done) {
 
         store.putObj(table,  {dataspec: "test-obj", id: 2, "field0": 27 } ,(e) => {
             if(e)
@@ -96,7 +96,7 @@ describe('#store', function() {
 
     });
 
-    it('finding objects', function(done) {
+    it('#06 finding objects', function(done) {
 
         store.findObj(table,  { id: 2 , "field0": 27} ,(e,r) => {
             if(e)
@@ -109,7 +109,7 @@ describe('#store', function() {
 
     });
 
-    it('2 objects after updating one', function(done) {
+    it('#07 2 objects after updating one', function(done) {
 
         store.putObj(table,  {dataspec: 'test-obj', id: 1 } ,(e,o) => {
             if(e)
@@ -120,7 +120,7 @@ describe('#store', function() {
                         done(e);
                     else {
                         expect(r).to.equal(2);
-                        store.getObj(table, {dataspec: 'test-obj', id: 1 }, (e, r) => {
+                        store.getObj(table,  1 , (e, r) => {
                             if(e)
                                 done(e);
                             else {
@@ -136,9 +136,9 @@ describe('#store', function() {
 
     });
 
-    it('1 objects after deleting one', function(done) {
+    it('#08 1 objects after deleting one', function(done) {
 
-        store.delObj(table,  {dataspec: "test-obj", id: 2 } ,(e) => {
+        store.delObj(table,  2  ,(e) => {
             if(e)
                 done(e);
             else {
@@ -155,7 +155,7 @@ describe('#store', function() {
 
     });
 
-    it('0 table after dropping one', function(done) {
+    it('#09 0 table after dropping one', function(done) {
 
         store.dropTable(table, (e) => {
             if(e)

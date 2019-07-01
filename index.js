@@ -49,41 +49,23 @@ const dyndbstore = function () {
         console.log("[dropTable|out]");
     };
 
-    const createTable = (parameters, callback) => {
-        console.log("[createTable|in] parameters:", parameters);
+    const createTableWithNumericId = (name, callback) => {
+        console.log("[createTableWithNumericId|in] name:", name);
 
         try {
             verify();
 
-            if( (! parameters.table) || (! parameters.rangeKey) || (! parameters.numKey) )
-                throw new Error('!!! must provide parameters ( table, rangeKey, numKey ) !!!');
+            if( ! name )
+                throw new Error('!!! must provide table name !!!');
 
             let params = {
-                AttributeDefinitions: [
-                    {
-                        AttributeName: parameters.rangeKey,
-                        AttributeType: 'S'
-                    },
-                    {
-                        AttributeName: parameters.numKey,
-                        AttributeType: 'N'
-                    }
-                ],
-                KeySchema: [
-                    {
-                        AttributeName: parameters.rangeKey,
-                        KeyType: 'HASH'
-                    },
-                    {
-                        AttributeName: parameters.numKey,
-                        KeyType: 'RANGE'
-                    }
-                ],
+                AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'N' }],
+                KeySchema: [ { AttributeName: 'id', KeyType: 'HASH' } ],
                 ProvisionedThroughput: {
                     ReadCapacityUnits: 16,
                     WriteCapacityUnits: 5
                 },
-                TableName: parameters.table,
+                TableName: name,
                 StreamSpecification: {
                     StreamEnabled: false
                 }
@@ -99,8 +81,9 @@ const dyndbstore = function () {
         catch(e){
             callback(e);
         }
-        console.log("[createTable|out]");
+        console.log("[createTableWithNumericId|out]");
     };
+
 
     const findTable = (table, callback) => {
         console.log("[findTable|in] table:", table);
@@ -140,6 +123,7 @@ const dyndbstore = function () {
         console.log("[getObjsCount|out]");
     };
 
+
     const putObj = (table, obj, callback) => {
         console.log("[putObj|in] table:", table, "obj:", obj);
         try{
@@ -170,17 +154,10 @@ const dyndbstore = function () {
 
             let expAttrValues = {};
             let expAttrNames = {};
-            let expression = '';
+            let expression = '#id = :id';
 
-            let i=0;
-            for (let prop in key) {
-                if (key.hasOwnProperty(prop)) {
-                    expAttrValues[':' + prop] = key[prop];
-                    expAttrNames['#' + prop] = prop;
-                    expression +=  ( 0 < i ? ' and ' : '' ) + '#' + prop + ' = ' + ':' + prop
-                    i++;
-                }
-            }
+            expAttrValues[':id'] = key;
+            expAttrNames['#id'] = 'id';
 
             let params = {
                 ExpressionAttributeValues: expAttrValues
@@ -213,7 +190,7 @@ const dyndbstore = function () {
             verify();
 
             var params = {
-                Key: key,
+                Key: {id: key},
                 TableName: table
             };
 
@@ -273,7 +250,7 @@ const dyndbstore = function () {
 
 
     return {
-        createTable: createTable
+        createTable: createTableWithNumericId
         , init: init
         , findTable: findTable
         , dropTable: dropTable

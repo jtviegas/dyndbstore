@@ -17,7 +17,6 @@ echo "...starting db container..."
 docker run -d -p 8000:8000 --name $CONTAINER amazon/dynamodb-local
 _pwd=`pwd`
 cd $this_folder
-mocha --reporter spec
 node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- -R spec test/*
 __r=$?
 
