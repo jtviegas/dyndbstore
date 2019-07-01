@@ -1,5 +1,11 @@
 language: node_js
 
+services:
+  - docker
+
+before_install:
+  - docker pull amazon/dynamodb-local
+
 node_js:
   - stable
 
