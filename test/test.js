@@ -8,7 +8,8 @@ describe('#store', function() {
     let table = 'TEST';
 
     before(function(done) {
-        store.init({ apiVersion: '2012-08-10' , region: 'eu-west-1' , 'endpoint': "http://localhost:8000"});
+        store.init({ apiVersion: '2012-08-10' , region: 'eu-west-1' , 'endpoint': "http://localhost:8000"
+            , aws_access_key_id: process.env.ACCESS_KEY_ID , aws_secret_access_key: process.env.ACCESS_KEY });
         done(null);
     });
 
