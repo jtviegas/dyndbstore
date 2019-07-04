@@ -175,7 +175,35 @@ describe('#store', function() {
 
     });
 
-    it('#08 5 objects after deleting one', function(done) {
+    it('#081 search for 2 objects by attribute range', function(done) {
+
+        store.findObjsByCriteria(table, { 'id': [2,6], 'dataspec': ['test-obj','test-obj3'] }, true,(e,r) => {
+            if(e)
+                done(e);
+            else {
+                expect(r.length).to.equal(2);
+                console.log(r);
+                done(null);
+            }
+        });
+
+    });
+
+    it('#082 search for 2 objects by attribute range no join', function(done) {
+
+        store.findObjsByCriteria(table, { 'id': 6, 'dataspec': 'test-obj4' }, false,(e,r) => {
+            if(e)
+                done(e);
+            else {
+                expect(r.length).to.equal(2);
+                console.log(r);
+                done(null);
+            }
+        });
+
+    });
+
+    it('#083 5 objects after deleting one', function(done) {
 
         store.delObj(table,  2  ,(e) => {
             if(e)
@@ -193,6 +221,8 @@ describe('#store', function() {
         });
 
     });
+
+
 
     it('#09 0 table after dropping one', function(done) {
 

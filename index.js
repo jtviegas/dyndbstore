@@ -301,7 +301,62 @@ const dyndbstore = function () {
         console.log("[findObjsByIdRange|out]");
     };
 
+    const findObjsByCriteria = (table, criteria, join, callback) => {
+        console.log("[findObjsByCriteria|in] table:", table, "criteria:", criteria, "join:", join);
+        try {
+            verify();
 
+            let joinExpression = ( join ? ' and ' : ' or ' );
+
+            let expressionValues = {};
+            let expAttrNames = {};
+            let filterExpression = '';
+
+            let index = 0;
+            for (let att in criteria){
+
+                if (criteria.hasOwnProperty(att)) {
+                    if( Array.isArray(criteria[att]) ){
+                        let expValue1  = ':' + att + '_a_' + index;
+                        let expValue2  = ':' + att + '_b_' + index;
+                        expressionValues[expValue1] = criteria[att][0];
+                        expressionValues[expValue2] = criteria[att][1];
+                        let expAttName = '#' + att;
+                        expAttrNames[expAttName] = att;
+                        filterExpression += (0 === filterExpression.length ? '' : joinExpression) + expValue1 + ' <= ' + expAttName + ' and ' + expValue2 +  ' >= ' + expAttName;
+                    }
+                    else {
+                        let expValue1  = ':' + att + '_a_' + index;
+                        expressionValues[expValue1] = criteria[att];
+                        let expAttName = '#' + att;
+                        expAttrNames[expAttName] = att;
+                        filterExpression += (0 === filterExpression.length ? '' : joinExpression) + expValue1 + ' = ' + expAttName;
+                    }
+
+                    index++;
+                }
+            }
+
+            let params = {
+                TableName : table,
+                FilterExpression : filterExpression,
+                ExpressionAttributeValues : expressionValues,
+                ExpressionAttributeNames: expAttrNames
+            };
+
+            doc.scan(params, function(err, data) {
+                if (err)
+                    callback(err);
+                else {
+                    callback(null, data.Items);
+                }
+            });
+        }
+        catch(e){
+            callback(e);
+        }
+        console.log("[findObjsByIdRange|out]");
+    };
 
 
     return {
@@ -316,6 +371,7 @@ const dyndbstore = function () {
         , findObj: findObj
         , putObjs: putObjs
         , findObjsByIdRange: findObjsByIdRange
+        , findObjsByCriteria: findObjsByCriteria
     };
 
 }();
