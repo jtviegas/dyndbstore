@@ -147,6 +147,31 @@ const dyndbstore = function () {
         console.log("[putObj|out]");
     };
 
+    const putObjs = (table, objArray, callback) => {
+        console.log("[putObjs|in] table:", table, "objArray:", objArray);
+        try{
+            verify();
+            let params = {};
+            params['RequestItems'] = {};
+            params.RequestItems[table] = [];
+
+            for (let obj of objArray)
+                params.RequestItems[table].push( {PutRequest: { Item: obj }} );
+
+            doc.batchWrite(params, function (err, data) {
+                if (err)
+                    callback(err);
+                else
+                    callback(null, data);
+
+            });
+        }
+        catch(e){
+            callback(e);
+        }
+        console.log("[putObjs|out]");
+    };
+
     const getObj = (table, key, callback) => {
         console.log("[getObj|in] table:", table, " key:", key);
         try{
@@ -226,7 +251,7 @@ const dyndbstore = function () {
                 }
             }
 
-            var params = {
+            let params = {
                 TableName : table,
                 FilterExpression : filterExpression,
                 ExpressionAttributeValues : expressionValues
@@ -246,6 +271,36 @@ const dyndbstore = function () {
         console.log("[findObj|out]");
     };
 
+    const findObjsByIdRange = (table, startId, endId, callback) => {
+        console.log("[findObjsByIdRange|in] table:", table, "startId:", startId, "endId:", endId);
+        try {
+            verify();
+
+            let expressionValues = {':id_1': startId, ':id_2': endId};
+            let expAttrNames = {'#id': 'id'};
+            let filterExpression = ':id_1 <= #id and :id_2 >= #id';
+
+            let params = {
+                TableName : table,
+                FilterExpression : filterExpression,
+                ExpressionAttributeValues : expressionValues,
+                ExpressionAttributeNames: expAttrNames
+            };
+
+            doc.scan(params, function(err, data) {
+                if (err)
+                    callback(err);
+                else {
+                    callback(null, data.Items);
+                }
+            });
+        }
+        catch(e){
+            callback(e);
+        }
+        console.log("[findObjsByIdRange|out]");
+    };
+
 
 
 
@@ -259,6 +314,8 @@ const dyndbstore = function () {
         , getObj: getObj
         , delObj: delObj
         , findObj: findObj
+        , putObjs: putObjs
+        , findObjsByIdRange: findObjsByIdRange
     };
 
 }();

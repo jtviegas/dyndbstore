@@ -136,7 +136,46 @@ describe('#store', function() {
 
     });
 
-    it('#08 1 objects after deleting one', function(done) {
+    it('#071 6 objects after adding 4', function(done) {
+
+        store.putObjs(table,  [{dataspec: 'test-obj3', id: 3 }, {dataspec: 'test-obj4', id: 4 }, {dataspec: 'test-obj5', id: 5 }, {dataspec: 'test-obj6', id: 6 }] ,(e,o) => {
+            if(e)
+                done(e);
+            else {
+                store.getObjsCount(table, (e, r) => {
+                    if(e)
+                        done(e);
+                    else {
+                        expect(r).to.equal(6);
+                        store.getObj(table,  1 , (e, r) => {
+                            if(e)
+                                done(e);
+                            else {
+                                expect(r).to.eql({dataspec: 'test-obj', id: 1 });
+                                done(null);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+    });
+
+    it('#08 search for 2 objects by id range', function(done) {
+
+        store.findObjsByIdRange(table, 3, 4,(e,r) => {
+            if(e)
+                done(e);
+            else {
+                expect(r.length).to.equal(2);
+                done(null);
+            }
+        });
+
+    });
+
+    it('#08 5 objects after deleting one', function(done) {
 
         store.delObj(table,  2  ,(e) => {
             if(e)
@@ -146,7 +185,7 @@ describe('#store', function() {
                     if(e)
                         done(e);
                     else {
-                        expect(r).to.equal(1);
+                        expect(r).to.equal(5);
                         done(null);
                     }
                 });
@@ -173,5 +212,7 @@ describe('#store', function() {
         });
 
     });
+
+
 
 });
