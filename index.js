@@ -18,9 +18,11 @@ const dyndbstore = function () {
 
     const init = (config) => {
         console.log("[init|in] config:", config);
-        db = new AWS.DynamoDB(config);
-        doc = new AWS.DynamoDB.DocumentClient(config);
-        initiated = true;
+        if(!initiated){
+            db = new AWS.DynamoDB(config);
+            doc = new AWS.DynamoDB.DocumentClient(config);
+            initiated = true;
+        }
         console.log("[init|out]");
     };
 
@@ -121,6 +123,25 @@ const dyndbstore = function () {
             callback(e);
         }
         console.log("[getObjsCount|out]");
+    };
+
+    const getObjs = (table, callback) => {
+        console.log("[getObjs|in] table:", table);
+        try{
+            verify();
+            let params = {TableName: table};
+            doc.scan(params, (e, d) => {
+                if (e)
+                    callback(e);
+                else {
+                    callback(null, d.Items);
+                }
+            });
+        }
+        catch(e){
+            callback(e);
+        }
+        console.log("[getObjs|out]");
     };
 
 
@@ -372,6 +393,7 @@ const dyndbstore = function () {
         , putObjs: putObjs
         , findObjsByIdRange: findObjsByIdRange
         , findObjsByCriteria: findObjsByCriteria
+        , getObjs: getObjs
     };
 
 }();

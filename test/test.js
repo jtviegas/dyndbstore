@@ -109,6 +109,20 @@ describe('#store', function() {
 
     });
 
+    it('#065 finding objects with empty filter, should get 2', function(done) {
+
+        store.getObjs(table, (e,r) => {
+            if(e)
+                done(e);
+            else {
+                expect(r.length).to.equal(2);
+                console.log(r);
+                done(null);
+            }
+        });
+
+    });
+
     it('#07 2 objects after updating one', function(done) {
 
         store.putObj(table,  {dataspec: 'test-obj', id: 1 } ,(e,o) => {
