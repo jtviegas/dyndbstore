@@ -130,7 +130,10 @@ const dyndbstore = function () {
         try{
             verify();
             let params = {TableName: table};
+            console.log("[getObjs] going for scan doc:", doc);
             doc.scan(params, (e, d) => {
+                console.log("[getObjs] e:", e);
+                console.log("[getObjs] d:", d);
                 if (e)
                     callback(e);
                 else {
