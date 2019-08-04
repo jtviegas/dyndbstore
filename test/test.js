@@ -242,11 +242,11 @@ describe('#dyndbstore', function() {
             if(e)
                 done(e);
             else {
-                store.getObjsCount(table, (e, r) => {
+                store.findObjIds(table, (e, r) => {
                     if(e)
                         done(e);
                     else {
-                        expect(r).to.equal(3);
+                        expect(r.length).to.equal(3);
                         done(null);
                     }
                 });

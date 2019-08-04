@@ -407,6 +407,33 @@ const dyndbstore = function () {
         console.log("[delObjs|out]");
     };
 
+    const findObjIds = (table, callback) => {
+        console.log("[findObjIds|in] table:", table);
+        try {
+            verify();
+            let params = {
+                TableName : table
+                , AttributesToGet: [ 'id' ]
+            };
+            doc.scan(params, function(err, data) {
+                if (err)
+                    callback(err);
+                else {
+                    let result = [];
+                    for( let i=0; i < data.Items.length; i++ ){
+                        let item = data.Items[i];
+                        result.push(item.id);
+                    }
+                    callback(null, result);
+                }
+            });
+        }
+        catch(e){
+            callback(e);
+        }
+        console.log("[findObjIds|out]");
+    };
+
 
     return {
         createTable: createTableWithNumericId
@@ -423,6 +450,7 @@ const dyndbstore = function () {
         , findObjsByCriteria: findObjsByCriteria
         , getObjs: getObjs
         , delObjs: delObjs
+        , findObjIds: findObjIds
     };
 
 }();
