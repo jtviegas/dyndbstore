@@ -3,8 +3,8 @@
 var expect = require('chai').expect;
 var store = require('../index');
 
-describe('#store', function() {
-
+describe('#dyndbstore', function() {
+    this.timeout(50000);
     let table = 'TEST';
 
     before(function(done) {
@@ -236,6 +236,24 @@ describe('#store', function() {
 
     });
 
+    it('#083 3 objects after deleting two more', function(done) {
+
+        store.delObjs(table,  [3,4]  ,(e) => {
+            if(e)
+                done(e);
+            else {
+                store.getObjsCount(table, (e, r) => {
+                    if(e)
+                        done(e);
+                    else {
+                        expect(r).to.equal(3);
+                        done(null);
+                    }
+                });
+            }
+        });
+
+    });
 
 
     it('#09 0 table after dropping one', function(done) {

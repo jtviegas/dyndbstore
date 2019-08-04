@@ -382,6 +382,31 @@ const dyndbstore = function () {
         console.log("[findObjsByIdRange|out]");
     };
 
+    const delObjs = (table, idArray, callback) => {
+        console.log("[delObjs|in] table:", table, "idArray:", idArray);
+        try{
+            verify();
+            let params = {};
+            params['RequestItems'] = {};
+            params.RequestItems[table] = [];
+
+            for (let _id of idArray)
+                params.RequestItems[table].push( {DeleteRequest: { Key: { id: _id } }} );
+
+            doc.batchWrite(params, function (err, data) {
+                if (err)
+                    callback(err);
+                else
+                    callback(null, data);
+
+            });
+        }
+        catch(e){
+            callback(e);
+        }
+        console.log("[delObjs|out]");
+    };
+
 
     return {
         createTable: createTableWithNumericId
@@ -397,6 +422,7 @@ const dyndbstore = function () {
         , findObjsByIdRange: findObjsByIdRange
         , findObjsByCriteria: findObjsByCriteria
         , getObjs: getObjs
+        , delObjs: delObjs
     };
 
 }();
