@@ -8,8 +8,17 @@ describe('#dyndbstore', function() {
     let table = 'TEST';
 
     before(function(done) {
-        store.init({ apiVersion: '2012-08-10' , region: 'eu-west-1' , endpoint: "http://localhost:8000"
-            , accessKeyId: process.env.ACCESS_KEY_ID , secretAccessKey: process.env.ACCESS_KEY });
+        let config = {
+            dyndbstore: {
+                apiVersion: '2012-08-10'
+                , region: 'eu-west-1'
+                , endpoint: "http://localhost:8000"
+                , accessKeyId: process.env.ACCESS_KEY_ID
+                , secretAccessKey: process.env.ACCESS_KEY
+            }
+        };
+
+        store.init(config.dyndbstore);
         done(null);
     });
 
