@@ -9,16 +9,14 @@ describe('#dyndbstore', function() {
 
     before(function(done) {
         let config = {
-            dyndbstore: {
-                apiVersion: '2012-08-10'
-                , region: 'eu-west-1'
-                , endpoint: "http://localhost:8000"
-                , accessKeyId: process.env.ACCESS_KEY_ID
-                , secretAccessKey: process.env.ACCESS_KEY
-            }
+                DYNDBSTORE_API_VERSION: '2012-08-10'
+                , DYNDBSTORE_REGION: 'eu-west-1'
+                , DYNDBSTORE_ENDPOINT: "http://localhost:8000"
+                , DYNDBSTORE_ACCESS_KEY_ID: process.env.ACCESS_KEY_ID
+                , DYNDBSTORE_ACCESS_KEY: process.env.ACCESS_KEY
         };
 
-        store.init(config.dyndbstore);
+        store.init(config);
         done(null);
     });
 

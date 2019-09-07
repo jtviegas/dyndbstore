@@ -4,8 +4,17 @@
 
 
 const AWS = require("aws-sdk");
+const commons = require('@jtviegas/jscommons').commons;
 
 const dyndbstore = function () {
+
+    const CONFIGURATION_SPEC = {
+        apiVersion: 'DYNDBSTORE_API_VERSION'
+        , region: 'DYNDBSTORE_REGION'
+        , endpoint: 'DYNDBSTORE_ENDPOINT'
+        , accessKeyId: 'DYNDBSTORE_ACCESS_KEY_ID'
+        , secretAccessKey: 'DYNDBSTORE_ACCESS_KEY'
+    };
 
     let initiated = false;
     let db;
@@ -18,9 +27,10 @@ const dyndbstore = function () {
 
     const init = (config) => {
         console.log("[init|in] config:", config);
+        let configuration = commons.getConfiguration(CONFIGURATION_SPEC, config);
         if(!initiated){
-            db = new AWS.DynamoDB(config);
-            doc = new AWS.DynamoDB.DocumentClient(config);
+            db = new AWS.DynamoDB(configuration);
+            doc = new AWS.DynamoDB.DocumentClient(configuration);
             initiated = true;
         }
         console.log("[init|out]");

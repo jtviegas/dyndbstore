@@ -12,6 +12,16 @@ store facade to DynamoDb
 
 ## Usage
 
+### environment variables and/or configuration properties
+
+    - DYNDBSTORE_API_VERSION
+    - DYNDBSTORE_REGION
+    - DYNDBSTORE_ENDPOINT
+    - DYNDBSTORE_ACCESS_KEY_ID
+    - DYNDBSTORE_ACCESS_KEY
+
+### code snippet example
+
     var store = require('@jtviegas/dyndbstore');
     // synchronous call this one
     store.init({ apiVersion: '2012-08-10' , region: 'eu-west-1' , endpoint: "http://localhost:8000"
