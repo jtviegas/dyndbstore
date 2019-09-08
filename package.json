@@ -1,6 +1,6 @@
 {
   "name": "@jtviegas/dyndbstore",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "store facade to a database, currently only DynamoDb implementation",
   "main": "index.js",
   "scripts": {
@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/jtviegas/dyndbstore#readme",
   "dependencies": {
-    "@jtviegas/jscommons": "0.0.8",
+    "@jtviegas/jscommons": "0.0.10",
     "aws-sdk": "^2.443.0"
   },
   "devDependencies": {
