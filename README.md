@@ -12,7 +12,7 @@ store facade to a database, currently only DynamoDb implementation
 
 ## Usage
 
-### environment variables and/or configuration properties
+### required environment variables or configuration properties
 
     - DYNDBSTORE_AWS_REGION
     - DYNDBSTORE_AWS_DB_ENDPOINT
