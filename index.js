@@ -1,19 +1,17 @@
 'use strict';
 
-
-
-
 const AWS = require("aws-sdk");
 const commons = require('@jtviegas/jscommons').commons;
 
 const dyndbstore = function () {
 
+    const AWS_API_VERSION = '2012-08-10';
+
     const CONFIGURATION_SPEC = {
-        apiVersion: 'DYNDBSTORE_API_VERSION'
-        , region: 'DYNDBSTORE_REGION'
-        , endpoint: 'DYNDBSTORE_ENDPOINT'
-        , accessKeyId: 'DYNDBSTORE_ACCESS_KEY_ID'
-        , secretAccessKey: 'DYNDBSTORE_ACCESS_KEY'
+        region: 'DYNDBSTORE_AWS_REGION'
+        , endpoint: 'DYNDBSTORE_AWS_DB_ENDPOINT'
+        , accessKeyId: 'DYNDBSTORE_AWS_ACCESS_KEY_ID'
+        , secretAccessKey: 'DYNDBSTORE_AWS_ACCESS_KEY'
     };
 
     let initiated = false;
@@ -27,7 +25,10 @@ const dyndbstore = function () {
 
     const init = (config) => {
         console.log("[init|in] config:", config);
+
         let configuration = commons.getConfiguration(CONFIGURATION_SPEC, config);
+        configuration.apiVersion = AWS_API_VERSION;
+
         if(!initiated){
             db = new AWS.DynamoDB(configuration);
             doc = new AWS.DynamoDB.DocumentClient(configuration);

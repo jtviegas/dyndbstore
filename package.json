@@ -1,7 +1,7 @@
 {
   "name": "@jtviegas/dyndbstore",
-  "version": "1.0.9",
-  "description": "store facade to DynamoDb",
+  "version": "1.0.10",
+  "description": "store facade to a database, currently only DynamoDb implementation",
   "main": "index.js",
   "scripts": {
     "test": "./test.sh"
