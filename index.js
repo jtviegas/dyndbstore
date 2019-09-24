@@ -1,7 +1,9 @@
 'use strict';
 
+const winston = require('winston');
 const AWS = require("aws-sdk");
 const commons = require('@jtviegas/jscommons').commons;
+const logger = winston.createLogger(commons.getDefaultWinstonConfig());
 
 const dyndbstore = function () {
 
@@ -9,9 +11,9 @@ const dyndbstore = function () {
 
     const CONFIGURATION_SPEC = {
         region: 'DYNDBSTORE_AWS_REGION'
-        , endpoint: 'DYNDBSTORE_AWS_DB_ENDPOINT'
         , accessKeyId: 'DYNDBSTORE_AWS_ACCESS_KEY_ID'
         , secretAccessKey: 'DYNDBSTORE_AWS_ACCESS_KEY'
+        , test: 'DYNDBSTORE_TEST'
     };
 
     let initiated = false;
@@ -24,21 +26,23 @@ const dyndbstore = function () {
     };
 
     const init = (config) => {
-        console.log("[init|in] config:", config);
+        logger.info("[dyndbstore|init|in] (%o)", config);
 
         let configuration = commons.getConfiguration(CONFIGURATION_SPEC, config);
         configuration.apiVersion = AWS_API_VERSION;
+        if( configuration.test && configuration.test.store_endpoint )
+            configuration.endpoint = configuration.test.store_endpoint;
 
         if(!initiated){
             db = new AWS.DynamoDB(configuration);
             doc = new AWS.DynamoDB.DocumentClient(configuration);
             initiated = true;
         }
-        console.log("[init|out]");
+        logger.info("[dyndbstore|init|out]");
     };
 
     const dropTable = (table, callback) => {
-        console.log("[dropTable|in] table:", table);
+        logger.debug("[dyndbstore|dropTable|in] (%s)", table);
 
         try {
             verify();
@@ -59,11 +63,11 @@ const dyndbstore = function () {
         catch(e){
             callback(e);
         }
-        console.log("[dropTable|out]");
+        logger.debug("[dyndbstore|dropTable|out]");
     };
 
     const createTableWithNumericId = (name, callback) => {
-        console.log("[createTableWithNumericId|in] name:", name);
+        logger.debug("[dyndbstore|createTableWithNumericId|in] (%s)", name);
 
         try {
             verify();
@@ -94,12 +98,12 @@ const dyndbstore = function () {
         catch(e){
             callback(e);
         }
-        console.log("[createTableWithNumericId|out]");
+        logger.debug("[dyndbstore|createTableWithNumericId|out]");
     };
 
 
     const findTable = (table, callback) => {
-        console.log("[findTable|in] table:", table);
+        logger.debug("[dyndbstore|findTable|in] (%s)", table);
         try{
             verify();
 
@@ -114,11 +118,11 @@ const dyndbstore = function () {
         catch(e){
             callback(e);
         }
-        console.log("[findTable|out]");
+        logger.debug("[dyndbstore|findTable|out]");
     };
 
     const getObjsCount = (table, callback) => {
-        console.log("[getObjsCount|in] table:", table);
+        logger.debug("[dyndbstore|getObjsCount|in] (%s)", table);
         try{
             verify();
             let params = {TableName: table};
@@ -133,18 +137,17 @@ const dyndbstore = function () {
         catch(e){
             callback(e);
         }
-        console.log("[getObjsCount|out]");
+        logger.debug("[dyndbstore|getObjsCount|out]");
     };
 
     const getObjs = (table, callback) => {
-        console.log("[getObjs|in] table:", table);
+        logger.debug("[dyndbstore|getObjs|in] (%s)", table);
         try{
             verify();
             let params = {TableName: table};
-            console.log("[getObjs] going for scan doc:", doc);
+            //logger.debug("[dyndbstore|getObjs] going for scan %o", doc);
             doc.scan(params, (e, d) => {
-                console.log("[getObjs] e:", e);
-                console.log("[getObjs] d:", d);
+                logger.debug("[dyndbstore|getObjs] e:%o d%o", e, d);
                 if (e)
                     callback(e);
                 else {
@@ -155,12 +158,12 @@ const dyndbstore = function () {
         catch(e){
             callback(e);
         }
-        console.log("[getObjs|out]");
+        logger.debug("[dyndbstore|getObjs|out]");
     };
 
 
     const putObj = (table, obj, callback) => {
-        console.log("[putObj|in] table:", table, "obj:", obj);
+        logger.debug("[dyndbstore|putObj|in] (%s,%o)", table, obj);
         try{
             verify();
             let params = {
@@ -179,11 +182,11 @@ const dyndbstore = function () {
         catch(e){
             callback(e);
         }
-        console.log("[putObj|out]");
+        logger.debug("[dyndbstore|putObj|out]");
     };
 
     const putObjs = (table, objArray, callback) => {
-        console.log("[putObjs|in] table:", table, "objArray:", objArray);
+        logger.debug("[dyndbstore|putObjs|in] (%s,%o)", table, objArray);
         try{
             verify();
             let params = {};
@@ -204,11 +207,11 @@ const dyndbstore = function () {
         catch(e){
             callback(e);
         }
-        console.log("[putObjs|out]");
+        logger.debug("[dyndbstore|putObjs|out]");
     };
 
     const getObj = (table, key, callback) => {
-        console.log("[getObj|in] table:", table, " key:", key);
+        logger.debug("[dyndbstore|getObj|in] (%s,%s)", table, key);
         try{
             verify();
 
@@ -226,7 +229,7 @@ const dyndbstore = function () {
                 , TableName: table
             };
             doc.query(params, (e, d) => {
-                console.log('[getObj|doc.query|cb] e:', e, 'd:', d);
+                logger.debug('[dyndbstore|getObj|doc.query|cb] (%o,%o)', e, d);
                 if (e)
                     callback(e);
                 else {
@@ -241,11 +244,11 @@ const dyndbstore = function () {
         catch(e){
             callback(e);
         }
-        console.log("[getObj|out]");
+        logger.debug("[dyndbstore|getObj|out]");
     };
 
     const delObj = (table, key, callback) => {
-        console.log("[delObj|in] table:", table, "key:", key);
+        logger.debug("[dyndbstore|delObj|in] (%s,%s)", table, key);
         try {
             verify();
 
@@ -266,11 +269,11 @@ const dyndbstore = function () {
                 callback(e);
             }
 
-        console.log("[delObj|out]");
+        logger.debug("[dyndbstore|delObj|out]");
     };
 
     const findObj = (table, filter, callback) => {
-        console.log("[findObj|in] table:", table, "filter:", filter);
+        logger.debug("[dyndbstore|findObj|in] (%s,%o)", table, filter);
         try {
             verify();
 
@@ -303,11 +306,11 @@ const dyndbstore = function () {
         catch(e){
             callback(e);
         }
-        console.log("[findObj|out]");
+        logger.debug("[dyndbstore|findObj|out]");
     };
 
     const findObjsByIdRange = (table, startId, endId, callback) => {
-        console.log("[findObjsByIdRange|in] table:", table, "startId:", startId, "endId:", endId);
+        logger.debug("[dyndbstore|findObjsByIdRange|in] (%s,%s,%s)", table, startId, endId);
         try {
             verify();
 
@@ -333,11 +336,11 @@ const dyndbstore = function () {
         catch(e){
             callback(e);
         }
-        console.log("[findObjsByIdRange|out]");
+        logger.debug("[dyndbstore|findObjsByIdRange|out]");
     };
 
     const findObjsByCriteria = (table, criteria, join, callback) => {
-        console.log("[findObjsByCriteria|in] table:", table, "criteria:", criteria, "join:", join);
+        logger.debug("[dyndbstore|findObjsByCriteria|in] (%s,%o,%o)", table, criteria, join);
         try {
             verify();
 
@@ -390,11 +393,11 @@ const dyndbstore = function () {
         catch(e){
             callback(e);
         }
-        console.log("[findObjsByIdRange|out]");
+        logger.debug("[dyndbstore|findObjsByIdRange|out]");
     };
 
     const delObjs = (table, idArray, callback) => {
-        console.log("[delObjs|in] table:", table, "idArray:", idArray);
+        logger.debug("[dyndbstore|delObjs|in] (%s,%o)", table, idArray);
         try{
             verify();
             let params = {};
@@ -415,11 +418,11 @@ const dyndbstore = function () {
         catch(e){
             callback(e);
         }
-        console.log("[delObjs|out]");
+        logger.debug("[dyndbstore|delObjs|out]");
     };
 
     const findObjIds = (table, callback) => {
-        console.log("[findObjIds|in] table:", table);
+        logger.debug("[dyndbstore|findObjIds|in] (%s)", table);
         try {
             verify();
             let params = {
@@ -442,7 +445,7 @@ const dyndbstore = function () {
         catch(e){
             callback(e);
         }
-        console.log("[findObjIds|out]");
+        logger.debug("[dyndbstore|findObjIds|out]");
     };
 
 
