@@ -13,7 +13,7 @@ const dyndbstore = function () {
     let doc;
 
     const CONSTANTS = {  apiVersion: '2012-08-10' , region: 'eu-west-1'  };
-    const CONFIGURATION_SPEC = [ 'REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'DYNDBSTORE_TEST_ENDPOINT' ];
+    const CONFIGURATION_SPEC = [ 'region', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'DYNDBSTORE_TEST_ENDPOINT' ];
     let configuration = commons.mergeConfiguration(CONSTANTS, commons.getEnvironmentVarsSubset(CONFIGURATION_SPEC));
 
     if( configuration.DYNDBSTORE_TEST_ENDPOINT )

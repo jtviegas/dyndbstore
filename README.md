@@ -12,25 +12,16 @@ store facade to a database, currently only DynamoDb implementation
 
 ## Usage
 
-### required environment variables or configuration properties
-
-    - DYNDBSTORE_AWS_REGION
-    - DYNDBSTORE_AWS_DB_ENDPOINT
-    - DYNDBSTORE_AWS_ACCESS_KEY_ID
-    - DYNDBSTORE_AWS_ACCESS_KEY
+### required environment variables
+    
+    - region - aws region ( not mandatory, default: eu-west-1 )
+    - AWS_ACCESS_KEY_ID ( mandatory )
+    - AWS_SECRET_ACCESS_KEY ( mandatory )
+    - DYNDBSTORE_TEST_ENDPOINT ( not mandatory, for testing purposes )
 
 ### code snippet example
 
     var store = require('@jtviegas/dyndbstore');
-    // synchronous call this one
-    let config = {
-                    DYNDBSTORE_AWS_REGION: 'eu-west-1'
-                    , DYNDBSTORE_AWS_ACCESS_KEY_ID: process.env.ACCESS_KEY_ID
-                    , DYNDBSTORE_AWS_ACCESS_KEY: process.env.ACCESS_KEY
-                    // testing purposes
-                    DYNDBSTORE_TEST: { store_endpoint: 'http://localhost:8000' }
-            };
-    store.init(config);
     store.getObjsCount(table, (e, r) => {
                 if(e)
                     done(e);
