@@ -7,46 +7,27 @@ const logger = winston.createLogger(commons.getDefaultWinstonConfig());
 
 const dyndbstore = function () {
 
-    const AWS_API_VERSION = '2012-08-10';
+    logger.info("[dyndbstore] initializing...");
 
-    const CONFIGURATION_SPEC = {
-        region: 'DYNDBSTORE_AWS_REGION'
-        , accessKeyId: 'DYNDBSTORE_AWS_ACCESS_KEY_ID'
-        , secretAccessKey: 'DYNDBSTORE_AWS_ACCESS_KEY'
-        , test: 'DYNDBSTORE_TEST'
-    };
-
-    let initiated = false;
     let db;
     let doc;
 
-    const verify = () => {
-        if(!initiated)
-            throw new Error('!!! module not initiated !!!');
-    };
+    const CONSTANTS = {  apiVersion: '2012-08-10' , region: 'eu-west-1'  };
+    const CONFIGURATION_SPEC = [ 'REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'DYNDBSTORE_TEST_ENDPOINT' ];
+    let configuration = commons.mergeConfiguration(CONSTANTS, commons.getEnvironmentVarsSubset(CONFIGURATION_SPEC));
 
-    const init = (config) => {
-        logger.info("[dyndbstore|init|in] (%o)", config);
+    if( configuration.DYNDBSTORE_TEST_ENDPOINT )
+        configuration.endpoint = configuration.DYNDBSTORE_TEST_ENDPOINT;
 
-        let configuration = commons.getConfiguration(CONFIGURATION_SPEC, config);
-        configuration.apiVersion = AWS_API_VERSION;
-        if( configuration.test && configuration.test.store_endpoint )
-            configuration.endpoint = configuration.test.store_endpoint;
+    db = new AWS.DynamoDB(configuration);
+    doc = new AWS.DynamoDB.DocumentClient(configuration);
 
-        if(!initiated){
-            db = new AWS.DynamoDB(configuration);
-            doc = new AWS.DynamoDB.DocumentClient(configuration);
-            initiated = true;
-        }
-        logger.info("[dyndbstore|init|out]");
-    };
+    logger.info("[dyndbstore] ...initializing done.");
 
     const dropTable = (table, callback) => {
         logger.debug("[dyndbstore|dropTable|in] (%s)", table);
 
         try {
-            verify();
-
             let params = {
                 TableName: table
             };
@@ -70,8 +51,6 @@ const dyndbstore = function () {
         logger.debug("[dyndbstore|createTableWithNumericId|in] (%s)", name);
 
         try {
-            verify();
-
             if( ! name )
                 throw new Error('!!! must provide table name !!!');
 
@@ -105,8 +84,6 @@ const dyndbstore = function () {
     const findTable = (table, callback) => {
         logger.debug("[dyndbstore|findTable|in] (%s)", table);
         try{
-            verify();
-
             let params = {"Limit": 100};
             db.listTables(params, function (err, data) {
                 if (err)
@@ -124,7 +101,6 @@ const dyndbstore = function () {
     const getObjsCount = (table, callback) => {
         logger.debug("[dyndbstore|getObjsCount|in] (%s)", table);
         try{
-            verify();
             let params = {TableName: table};
             doc.scan(params, (e, d) => {
                 if (e)
@@ -143,9 +119,7 @@ const dyndbstore = function () {
     const getObjs = (table, callback) => {
         logger.debug("[dyndbstore|getObjs|in] (%s)", table);
         try{
-            verify();
             let params = {TableName: table};
-            //logger.debug("[dyndbstore|getObjs] going for scan %o", doc);
             doc.scan(params, (e, d) => {
                 logger.debug("[dyndbstore|getObjs] e:%o d%o", e, d);
                 if (e)
@@ -165,7 +139,6 @@ const dyndbstore = function () {
     const putObj = (table, obj, callback) => {
         logger.debug("[dyndbstore|putObj|in] (%s,%o)", table, obj);
         try{
-            verify();
             let params = {
                 TableName: table,
                 Item: obj
@@ -188,7 +161,6 @@ const dyndbstore = function () {
     const putObjs = (table, objArray, callback) => {
         logger.debug("[dyndbstore|putObjs|in] (%s,%o)", table, objArray);
         try{
-            verify();
             let params = {};
             params['RequestItems'] = {};
             params.RequestItems[table] = [];
@@ -213,8 +185,6 @@ const dyndbstore = function () {
     const getObj = (table, key, callback) => {
         logger.debug("[dyndbstore|getObj|in] (%s,%s)", table, key);
         try{
-            verify();
-
             let expAttrValues = {};
             let expAttrNames = {};
             let expression = '#id = :id';
@@ -250,8 +220,6 @@ const dyndbstore = function () {
     const delObj = (table, key, callback) => {
         logger.debug("[dyndbstore|delObj|in] (%s,%s)", table, key);
         try {
-            verify();
-
             var params = {
                 Key: {id: key},
                 TableName: table
@@ -275,8 +243,6 @@ const dyndbstore = function () {
     const findObj = (table, filter, callback) => {
         logger.debug("[dyndbstore|findObj|in] (%s,%o)", table, filter);
         try {
-            verify();
-
             let filterExpression = '';
             let expressionValues = {};
 
@@ -312,8 +278,6 @@ const dyndbstore = function () {
     const findObjsByIdRange = (table, startId, endId, callback) => {
         logger.debug("[dyndbstore|findObjsByIdRange|in] (%s,%s,%s)", table, startId, endId);
         try {
-            verify();
-
             let expressionValues = {':id_1': startId, ':id_2': endId};
             let expAttrNames = {'#id': 'id'};
             let filterExpression = ':id_1 <= #id and :id_2 >= #id';
@@ -342,7 +306,6 @@ const dyndbstore = function () {
     const findObjsByCriteria = (table, criteria, join, callback) => {
         logger.debug("[dyndbstore|findObjsByCriteria|in] (%s,%o,%o)", table, criteria, join);
         try {
-            verify();
 
             let joinExpression = ( join ? ' and ' : ' or ' );
 
@@ -399,7 +362,6 @@ const dyndbstore = function () {
     const delObjs = (table, idArray, callback) => {
         logger.debug("[dyndbstore|delObjs|in] (%s,%o)", table, idArray);
         try{
-            verify();
             let params = {};
             params['RequestItems'] = {};
             params.RequestItems[table] = [];
@@ -424,7 +386,6 @@ const dyndbstore = function () {
     const findObjIds = (table, callback) => {
         logger.debug("[dyndbstore|findObjIds|in] (%s)", table);
         try {
-            verify();
             let params = {
                 TableName : table
                 , AttributesToGet: [ 'id' ]
@@ -451,7 +412,6 @@ const dyndbstore = function () {
 
     return {
         createTable: createTableWithNumericId
-        , init: init
         , findTable: findTable
         , dropTable: dropTable
         , getObjsCount: getObjsCount

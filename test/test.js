@@ -1,23 +1,24 @@
 'use strict';
 
 var expect = require('chai').expect;
-var store = require('../index');
+
 
 describe('#dyndbstore', function() {
     this.timeout(50000);
     let table = 'TEST';
+    let store;
 
     before(function(done) {
-        let config = {
-            DYNDBSTORE_AWS_REGION: 'eu-west-1'
-            , DYNDBSTORE_TEST: {
-                store_endpoint: 'http://localhost:8000'
-            }
-            , DYNDBSTORE_AWS_ACCESS_KEY_ID: process.env.ACCESS_KEY_ID
-            , DYNDBSTORE_AWS_ACCESS_KEY: process.env.ACCESS_KEY
-        };
 
-        store.init(config);
+        if ( ! process.env['AWS_ACCESS_KEY_ID'] )
+            done( 'must provide env var AWS_ACCESS_KEY_ID' );
+        if ( ! process.env['AWS_SECRET_ACCESS_KEY'] )
+            done( 'must provide env var AWS_SECRET_ACCESS_KEY' );
+        if ( ! process.env['DYNDBSTORE_TEST_ENDPOINT'] )
+            done( 'must provide env var DYNDBSTORE_TEST_ENDPOINT for the test' );
+
+        store = require('../index');
+
         done(null);
     });
 
