@@ -185,6 +185,19 @@ describe('#dyndbstore', function() {
 
     });
 
+    it('#074 find last id', function(done) {
+
+        store.getLastId(table,(e,r) => {
+            if(e)
+                done(e);
+            else {
+                expect(r).to.equal(6);
+                done(null);
+            }
+        });
+
+    });
+
     it('#08 search for 2 objects by id range', function(done) {
 
         store.findObjsByIdRange(table, 3, 4,(e,r) => {
@@ -263,7 +276,6 @@ describe('#dyndbstore', function() {
         });
 
     });
-
 
     it('#09 0 table after dropping one', function(done) {
 

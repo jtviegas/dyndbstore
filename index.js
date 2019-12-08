@@ -98,6 +98,35 @@ const dyndbstore = function () {
         logger.debug("[dyndbstore|findTable|out]");
     };
 
+    const getLastId = (table, callback) => {
+        logger.debug("[dyndbstore|getLastId|in] (%s)", table);
+        try{
+            let params = {TableName: table};
+            doc.scan(params, (e, d) => {
+                if (e)
+                    callback(e);
+                else {
+                    let id = null;
+                    if( 0 < d.Items.length ){
+                        d.Items.sort((a,b) => {
+                            if(a.id < b.id )
+                                return -1
+                            else
+                                return 1;
+                        })
+                        id = d.Items[d.Items.length-1].id
+                    }
+                    logger.info('[dyndbstore|getLastId] id: %s', id);
+                    callback(null, id);
+                }
+            });
+        }
+        catch(e){
+            callback(e);
+        }
+        logger.debug("[dyndbstore|getLastId|out]");
+    };
+
     const getObjsCount = (table, callback) => {
         logger.debug("[dyndbstore|getObjsCount|in] (%s)", table);
         try{
@@ -425,6 +454,7 @@ const dyndbstore = function () {
         , getObjs: getObjs
         , delObjs: delObjs
         , findObjIds: findObjIds
+        , getLastId: getLastId
     };
 
 }();
