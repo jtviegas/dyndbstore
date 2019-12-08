@@ -127,6 +127,39 @@ const dyndbstore = function () {
         logger.debug("[dyndbstore|getLastId|out]");
     };
 
+    const getLastN = (table, n, callback) => {
+        logger.debug("[dyndbstore|getLastN|in] (%s,%s)", table, n);
+        try{
+            let params = {TableName: table};
+            doc.scan(params, (e, d) => {
+                if (e)
+                    callback(e);
+                else {
+                    let r = [];
+                    if( 0 < d.Items.length ){
+                        d.Items.sort((a,b) => {
+                            if(a.id < b.id )
+                                return -1
+                            else
+                                return 1;
+                        });
+                        if( d.Items.length > n )
+                            r = d.Items.slice(d.Items.length-n);
+                        else
+                            r = d.Items;
+
+                    }
+                    logger.info('[dyndbstore|getLastN] r: %o', r);
+                    callback(null, r);
+                }
+            });
+        }
+        catch(e){
+            callback(e);
+        }
+        logger.debug("[dyndbstore|getLastN|out]");
+    };
+
     const getObjsCount = (table, callback) => {
         logger.debug("[dyndbstore|getObjsCount|in] (%s)", table);
         try{
@@ -455,6 +488,7 @@ const dyndbstore = function () {
         , delObjs: delObjs
         , findObjIds: findObjIds
         , getLastId: getLastId
+        , getLastN: getLastN
     };
 
 }();

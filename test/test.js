@@ -198,6 +198,21 @@ describe('#dyndbstore', function() {
 
     });
 
+    it('#076 find last n', function(done) {
+
+        store.getLastN(table, 2,(e,r) => {
+            if(e)
+                done(e);
+            else {
+                expect(r.length).to.equal(2);
+                expect(r[0].id).to.equal(5);
+                expect(r[1].id).to.equal(6);
+                done(null);
+            }
+        });
+
+    });
+
     it('#08 search for 2 objects by id range', function(done) {
 
         store.findObjsByIdRange(table, 3, 4,(e,r) => {
