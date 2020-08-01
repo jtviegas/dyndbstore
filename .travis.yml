@@ -11,8 +11,9 @@ install:
 script:
 - npm test
 deploy:
+  edge: true
   provider: npm
-  email: "jtviegas.js@gmail.com"
-  api_key:
-    secure: WBWQlNSVRu1A85xRXxRc9UiY2W8dp/KjLL2GkR/mFrX0C1DAKVVeZB/ppVCxDvCmN5zjf2cWXqpYsPDUeDZSO8D8V2tAIs3dqIf3hBCgQyEqyEA9Nh1iM1wdtAWYewjIX8lLpcE4pkBekyj4FRyxJNUS3fSLT25rYjiMPN1nEvfBEpsZi/WXZ/EeB5CStHVX2RhiCbMf8rymR6gYSJBqgIUzc1Y9U4oU5mS3y8gvq5ZHzAwfkXUCzjlJETfHm6D/JC4nBW7GWYO3Frru/r0paIpaKgwiW28WiQaFNp2lPwmObpiN2XXgM1iJtJ/fU4dGO1Yk/CZMTCoPsk/2fi2O6vNG4pgfvGZlvfjS68mc08b1SIpl8ZzEQT++dYhP97RuxTFHu15MEPNiET3E+MhVYRVlzK1Bdx4I2oLz3MbhXDSX7Qxb5uvFJsrN6P0aPDXy2r6xlpE4AQS0w32IJMKs3vjlKAz++jR7wKPKg/EILYVsNhFRnUzGPzfuTX8yIiZyU/GDrTjACnV8cGc9SknGr2K54y2TsLSu+9JNb1HRYwFtK4djH7bazLXrN0HbAVyt9qZnrGRuzdbbaIwy4zMkmAtc/PCUFgX4zn7u2hxxHPip602eMO+oc11KhV2b54AfQFQ4BHqMXsD+yNy4Nyds/ycE6yPtRog7BnTYcuNcRxE=
+  email: "$NPM_EMAIL"
+  api_key: "$NPM_TOKEN"
+  cleanup: true
 after_script: cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js
