@@ -35,5 +35,8 @@
     "coveralls": "^3.0.7",
     "istanbul": "^0.4.5",
     "mocha": "^6.2.2"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
