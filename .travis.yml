@@ -14,6 +14,7 @@ deploy:
   edge: true
   provider: npm
   email: "$NPM_EMAIL"
-  api_key: "$NPM_TOKEN"
   cleanup: true
+  api_token: "$NPM_TOKEN"
+  access: public
 after_script: cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js
