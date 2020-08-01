@@ -68,7 +68,7 @@ publish(){
   info "[publish] ..."
   _pwd=`pwd`
   cd "$this_folder"
-  npm publish --access=public
+  npm publish . --access="public"
   if [ ! "$?" -eq "0" ]; then err "[publish] could not publish" && cd "$_pwd" && return 1; fi
   cd "$_pwd"
   info "[publish] ...done."
