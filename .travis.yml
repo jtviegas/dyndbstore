@@ -13,8 +13,5 @@ script:
 deploy:
   edge: true
   provider: npm
-  email: "$NPM_EMAIL"
-  cleanup: true
   access: public
-  registry: https://registry.npmjs.org/
 after_script: cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js
