@@ -5,7 +5,7 @@ services:
 before_install:
 - docker pull amazon/dynamodb-local
 node_js:
-- stable
+- lts/*
 install:
 - npm install
 script:
