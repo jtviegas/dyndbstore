@@ -21,7 +21,7 @@ deploy:
   email: "jtviegas.js@gmail.com"
   api_key: "bbf516dd-a29f-42ee-b6e7-13742cf435d9"
   on:
-    tags: true
+    tag: release
 
 # Send coverage data to Coveralls
 after_script: "cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js"
