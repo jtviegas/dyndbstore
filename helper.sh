@@ -97,20 +97,6 @@ test(){
   return $__r
 }
 
-travis(){
-  info "[travis] ..."
-
-  test
-  if [ ! "$?" -eq "0" ]; then err "[travis] could not run tests correctly" && return 1; fi
-  if [ "$TRAVIS_TAG" == "$DYNDBSTORE_RELEASE_TAG" ]; then
-    publish
-    if [ ! "$?" -eq "0" ]; then err "[travis] could not publish to npm" && return 1; fi
-  fi
-
-  info "[travis] ...done."
-  return $__r
-}
-
 usage() {
   cat <<EOM
   usage:
@@ -119,7 +105,6 @@ usage() {
       - dependencies: installs dependencies
       - test: runs tests
       - publish: publishes to npm
-      - travis: runs travis CI flow
 
 EOM
   exit 1
@@ -139,9 +124,6 @@ case "$1" in
     ;;
   test)
     test
-    ;;
-  travis)
-    travis
     ;;
   *)
     usage

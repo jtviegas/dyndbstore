@@ -1,11 +1,10 @@
 {
   "name": "@jtviegas/dyndbstore",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "store facade to a database, currently only DynamoDb implementation",
   "main": "index.js",
   "scripts": {
     "test": "./helper.sh test"
-    , "travis": "./helper.sh travis"
   },
   "repository": {
     "type": "git",
