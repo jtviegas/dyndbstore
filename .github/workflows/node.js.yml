@@ -30,6 +30,6 @@ jobs:
       env:
         AWS_ACCESS_KEY_ID: AKIAQTMU5GI34VJDFV3C
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    - run: npm publish --access="public"
+    - run: npm publish --access public
       env:
         NODE_AUTH_TOKEN: ${{secrets.NPM_API_TOKEN}}
