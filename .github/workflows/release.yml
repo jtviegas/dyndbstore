@@ -1,19 +1,15 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: test
+name: release
 
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [10.x, 12.x, 14.x]
@@ -24,13 +20,12 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-        registry-url: https://registry.npmjs.org/
     - run: npm ci
     - run: npm run build --if-present
-    - run: npm test
+    - run: npm run-script test
       env:
-        AWS_ACCESS_KEY_ID: AKIAQTMU5GI34VJDFV3C
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    - run: npm publish --access public
+    - run: npm run-script publicate
       env:
-        NODE_AUTH_TOKEN: ${{secrets.NPM_API_TOKEN}}
+        NPM_TOKEN: ${{secrets.NPM_TOKEN}}

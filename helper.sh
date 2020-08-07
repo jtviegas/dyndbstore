@@ -68,6 +68,7 @@ publish(){
   info "[publish] ..."
   _pwd=`pwd`
   cd "$this_folder"
+  npm config set "//${NPM_REGISTRY}/:_authToken" "${NPM_TOKEN}"
   npm publish . --access="public"
   if [ ! "$?" -eq "0" ]; then err "[publish] could not publish" && cd "$_pwd" && return 1; fi
   cd "$_pwd"
