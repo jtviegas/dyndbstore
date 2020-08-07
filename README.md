@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/jtviegas/dyndbstore.svg?branch=master)](https://travis-ci.org/jtviegas/dyndbstore)
+![master build & test](https://github.com/jtviegas/dyndbstore/workflows/master%20build%20&%20test/badge.svg?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/jtviegas/dyndbstore/badge.svg?branch=master)](https://coveralls.io/github/jtviegas/dyndbstore?branch=master)
 
 dyndbstore
