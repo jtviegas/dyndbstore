@@ -5,7 +5,7 @@
 dyndbstore
 =========
 
-store facade to a database, currently only DynamoDb implementation
+store facade to DynamoDb
 
 ## Installation
 

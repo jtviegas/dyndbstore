@@ -103,7 +103,6 @@ usage() {
   usage:
   $(basename $0) { dependencies | publish | test | travis }
 
-      - dependencies: installs dependencies
       - test: runs tests
       - publish: publishes to npm
 
@@ -117,9 +116,6 @@ debug "1: $1 2: $2 3: $3 4: $4 5: $5 6: $6 7: $7 8: $8 9: $9"
 
 
 case "$1" in
-  dependencies)
-    dependencies
-    ;;
   publish)
     publish
     ;;
