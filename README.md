@@ -1,4 +1,5 @@
 ![master build & test](https://github.com/jtviegas/dyndbstore/workflows/master%20build%20&%20test/badge.svg?branch=master)
+![release build, test & publish](https://github.com/jtviegas/dyndbstore/workflows/release%20build,%20test%20&%20publish/badge.svg?branch=release)
 [![Coverage Status](https://coveralls.io/repos/github/jtviegas/dyndbstore/badge.svg?branch=master)](https://coveralls.io/github/jtviegas/dyndbstore?branch=master)
 
 dyndbstore
