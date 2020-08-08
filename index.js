@@ -365,6 +365,42 @@ const dyndbstore = function () {
         logger.debug("[dyndbstore|findObjsByIdRange|out]");
     };
 
+    const findObjsFromId = (table, fromId, limit, callback) => {
+        logger.debug("[dyndbstore|findObjsFromId|in] (%s,%s,%s)", table, fromId, limit);
+        try {
+            let params = {TableName: table};
+            doc.scan(params, (e, d) => {
+                if (e)
+                    callback(e);
+                else {
+                    let r = [];
+                    if( 0 < d.Items.length ){
+                        d.Items.sort((a,b) => {
+                            if(a.id < b.id )
+                                return -1
+                            else
+                                return 1;
+                        });
+                        // logger.debug('[dyndbstore|findObjsFromId] sorted items: %o', d.Items);
+                        if( d.Items.length > limit ){
+                            let index = d.Items.findIndex( (o) => o.id === fromId );
+                            r = d.Items.slice(index, index+limit);
+                        }
+                        else
+                            r = d.Items;
+                    }
+                    // logger.debug('[dyndbstore|findObjsFromId] r: %o', r);
+                    callback(null, r);
+                }
+            });
+
+        }
+        catch(e){
+            callback(e);
+        }
+        logger.debug("[dyndbstore|findObjsFromId|out]");
+    };
+
     const findObjsByCriteria = (table, criteria, join, callback) => {
         logger.debug("[dyndbstore|findObjsByCriteria|in] (%s,%o,%o)", table, criteria, join);
         try {
@@ -489,6 +525,7 @@ const dyndbstore = function () {
         , findObjIds: findObjIds
         , getLastId: getLastId
         , getLastN: getLastN
+        , findObjsFromId: findObjsFromId
     };
 
 }();

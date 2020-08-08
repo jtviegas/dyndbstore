@@ -69,7 +69,7 @@ describe('#dyndbstore', function() {
 
     it('04 1 object after adding one', function(done) {
 
-        store.putObj(table,  {dataspec: "test-obj", id: 1, "field0": 23 } ,(e) => {
+        store.putObj(table,  { id: 1, "field0": 23, dataspec: "test-obj" } ,(e) => {
             if(e)
                 done(e);
             else {
@@ -88,7 +88,7 @@ describe('#dyndbstore', function() {
 
     it('#05 2 objects after adding another one', function(done) {
 
-        store.putObj(table,  {dataspec: "test-obj", id: 2, "field0": 27 } ,(e) => {
+        store.putObj(table,  { id: 2, "field0": 27, dataspec: "test-obj" } ,(e) => {
             if(e)
                 done(e);
             else {
@@ -111,7 +111,7 @@ describe('#dyndbstore', function() {
             if(e)
                 done(e);
             else {
-                expect(r[0]).to.eql({dataspec: "test-obj", id: 2, "field0": 27 });
+                expect(r[0]).to.eql({ id: 2, "field0": 27, dataspec: "test-obj" });
                 done(null);
             }
         });
@@ -134,7 +134,7 @@ describe('#dyndbstore', function() {
 
     it('#07 2 objects after updating one', function(done) {
 
-        store.putObj(table,  {dataspec: 'test-obj', id: 1 } ,(e,o) => {
+        store.putObj(table,  {id: 1 , dataspec: 'test-obj'} ,(e,o) => {
             if(e)
                 done(e);
             else {
@@ -147,7 +147,7 @@ describe('#dyndbstore', function() {
                             if(e)
                                 done(e);
                             else {
-                                expect(r).to.eql({dataspec: 'test-obj', id: 1 });
+                                expect(r).to.eql({id: 1 , dataspec: 'test-obj'});
                                 done(null);
                             }
                         });
@@ -161,7 +161,7 @@ describe('#dyndbstore', function() {
 
     it('#071 6 objects after adding 4', function(done) {
 
-        store.putObjs(table,  [{dataspec: 'test-obj3', id: 3 }, {dataspec: 'test-obj4', id: 4 }, {dataspec: 'test-obj5', id: 5 }, {dataspec: 'test-obj6', id: 6 }] ,(e,o) => {
+        store.putObjs(table,  [{id: 3, dataspec: 'test-obj3' }, {id: 4, dataspec: 'test-obj4' }, {id: 5, dataspec: 'test-obj5' }, { id: 6, dataspec: 'test-obj6' }] ,(e,o) => {
             if(e)
                 done(e);
             else {
@@ -174,7 +174,7 @@ describe('#dyndbstore', function() {
                             if(e)
                                 done(e);
                             else {
-                                expect(r).to.eql({dataspec: 'test-obj', id: 1 });
+                                expect(r).to.eql({id: 1, dataspec: 'test-obj'});
                                 done(null);
                             }
                         });
@@ -248,6 +248,22 @@ describe('#dyndbstore', function() {
             else {
                 expect(r.length).to.equal(2);
                 console.log(r);
+                done(null);
+            }
+        });
+
+    });
+
+    it('#0825 find for 4 objects from specific id', function(done) {
+
+        store.findObjsFromId(table, 2, 4,(e,r) => {
+            if(e)
+                done(e);
+            else {
+                console.log(r);
+                expect(r.length).to.equal(4);
+                expect(r[0].id).to.equal(2);
+                expect(r[3].id).to.equal(5);
                 done(null);
             }
         });
