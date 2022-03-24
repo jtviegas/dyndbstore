@@ -30,7 +30,7 @@
     "@jtviegas/jscommons": "0.0.25",
     "aws-sdk": "^2.585.0",
     "handlebars": "^4.7.6",
-    "minimist": "^0.2.1",
+    "minimist": "^1.2.6",
     "winston": "^3.2.1"
   },
   "devDependencies": {
