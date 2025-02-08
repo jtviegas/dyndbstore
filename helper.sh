@@ -110,16 +110,6 @@ verify(){
   info "[verify] ...done."
 }
 
-publish(){
-  info "[publish] ..."
-  _pwd=`pwd`
-  cd "$this_folder"
-  npm config set "//${NPM_REGISTRY}/:_authToken" "${NPM_TOKEN}"
-  npm publish . --access="public"
-  if [ ! "$?" -eq "0" ]; then err "[publish] could not publish" && cd "$_pwd" && return 1; fi
-  cd "$_pwd"
-  info "[publish] ...done."
-}
 
 test(){
   info "[test|in]"
@@ -169,7 +159,7 @@ debug "1: $1 2: $2 3: $3 4: $4 5: $5 6: $6 7: $7 8: $8 9: $9"
 
 case "$1" in
   publish)
-    publish
+    npm_publish "$NPM_REGISTRY" "$NPM_TOKEN" "$this_folder"
     ;;
   update)
     update_bashutils
