@@ -104,6 +104,9 @@ verify(){
   which docker 1>/dev/null
   if [ ! "$?" -eq "0" ] ; then err "please install docker" && return 1; fi
 
+  which jest 1>/dev/null
+  if [ ! "$?" -eq "0" ] ; then err "please install jest" && return 1; fi
+
   info "[verify] ...done."
 }
 
