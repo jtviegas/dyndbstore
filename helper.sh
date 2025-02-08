@@ -125,7 +125,7 @@ test(){
   cd "$this_folder"
   jest
   __r=$?
-  if [ ! "$__r" -eq "0" ]; then err "[test] could not test and check coverage" ; fi
+  [ ! "$__r" -eq "0" ] && err "[test] could not test and check coverage" && exit 1
 
   cd "$_pwd"
   info "...stopping db container..."
