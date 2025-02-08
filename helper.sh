@@ -125,15 +125,14 @@ test(){
   cd "$this_folder"
   jest
   __r=$?
-  [ ! "$__r" -eq "0" ] && err "[test] could not test and check coverage" && exit 1
 
   cd "$_pwd"
   info "...stopping db container..."
   docker stop $DYNDBSTORE_CONTAINER
   docker rm $DYNDBSTORE_CONTAINER
 
-  result="$?"
-  [ "$result" -ne "0" ] && err "[test|out]  => ${result}" && exit 1
+  [ ! "$__r" -eq "0" ] && err "[test] could not test and check coverage" && exit 1
+  result="$__r"
   info "[test|out] => ${result}"
 }
 

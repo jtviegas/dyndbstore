@@ -155,6 +155,55 @@ class AbstractSchema {
     }
 }
 
+class SimpleItemEntity extends AbstractSchema {
+
+    toEntity(obj){
+        const result =  {
+            "id": {"S": obj.id},
+            "name": {"S": obj.name},
+            "description": {"S": obj.description},
+            "price": {"N": obj.price.toString()},
+            "added": {"N": obj.added.toString()},
+            "category": {"S": obj.category},
+            "subCategory": {"S": obj.subCategory},
+            "images": {"L": []}
+        }
+        for(const img of obj.images){
+            result.images.L.push(
+                {"M": {
+                    "id": {"S": img.id},
+                    "name": {"S": img.name},
+                    "src": {"S": img.src}
+                }}
+            )
+        }
+        return result;
+    }
+
+    fromEntity(entity){
+        const result =  {
+            "id": entity.id.S,
+            "name": entity.name.S,
+            "description": entity.description.S,
+            "price": parseInt(entity.price.N),
+            "added": parseInt(entity.added.N),
+            "category": entity.category.S,
+            "subCategory": entity.subCategory.S,
+            "images": []
+        }
+        for(const img of entity.images.L){
+            result.images.push(
+                {
+                    "id": img.M.id.S,
+                    "name": img.M.name.S,
+                    "src": img.M.src.S
+                }
+            )
+        }
+        return result;
+    }
+}
+
 class DynamoDbStoreWrapper {
 
     constructor(config, schemas) {
@@ -253,3 +302,4 @@ module.exports = {};
 module.exports.DynamoDbStore = DynamoDbStore;
 module.exports.DynamoDbStoreWrapper = DynamoDbStoreWrapper;
 module.exports.AbstractSchema = AbstractSchema;
+module.exports.SimpleItemEntity= SimpleItemEntity;
