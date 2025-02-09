@@ -113,7 +113,7 @@ class DynamoDbStore {
     };
 
     async getObjs (table, key) {
-        logger.info("[DynamoDbStore|getObjs|in] (%s)", table);
+        logger.info("[DynamoDbStore|getObjs|in] (%s, %s)", table, key);
         const input= { 
             "TableName": table,
             "Limit": this.scanLimit
@@ -142,20 +142,64 @@ class DynamoDbStore {
         return response
     };
 
+    async getAttributeProjection (table, attribute) {
+        logger.info("[DynamoDbStore|getAttributeProjection|in] (%s, %s)", table, attribute);
+        const result = []
+        const input= { 
+            "TableName": table,
+            "ProjectionExpression": attribute,
+            Limit: 3,
+        };
+        input
+        let lastEvaluatedKey = "";
+        while(lastEvaluatedKey !== undefined){
+            const command = new ScanCommand(input);
+            logger.info("[DynamoDbStore|getAttributeProjection] scanning with lastKey: %s", lastEvaluatedKey);
+            const response = await this.client.send(command);
+            logger.info("[DynamoDbStore|getAttributeProjection] response: %o", response);
+            lastEvaluatedKey = response.LastEvaluatedKey;
+
+            result.push(...response.Items);
+            if(lastEvaluatedKey !== undefined){
+                input.ExclusiveStartKey = lastEvaluatedKey;
+            } 
+        }
+        logger.info("[DynamoDbStore|getAttributeProjection|out] => %o", result);
+        return result
+    };
 }
 
 class AbstractSchema {
-
+    getAttributteType(attribute){
+        throw new Error("getAttributteType() must be implemented by subclasses");
+    }
     toEntity(obj){
         throw new Error("toEntity() must be implemented by subclasses");
     }
-
     fromEntity(entity){
         throw new Error("fromEntity() must be implemented by subclasses");
     }
 }
 
 class SimpleItemEntity extends AbstractSchema {
+    
+    constructor() {
+        super();
+        this.types = {
+            "id": "S",
+            "name": "S",
+            "description": "S",
+            "price": "N",
+            "added": "N",
+            "category": "S",
+            "subCategory": "S",
+            "images": "L"
+        };
+    }
+    
+    getAttributteType(attribute){
+        return this.types[attribute]
+    }
 
     toEntity(obj){
         const result =  {
@@ -294,6 +338,19 @@ class DynamoDbStoreWrapper {
         logger.info("[DynamoDbStoreWrapper|delObj|in] (%s, %s)", table, id);
         const response = await this.store.delObj(table, {"id": {"S": id}});
         logger.info("[DynamoDbStoreWrapper|delObj|out] => %o", response);
+    };
+
+    async getAttributeProjection (table, attribute) {
+        logger.info("[DynamoDbStoreWrapper|getAttributeProjection|in] (%s, %s)", table, attribute);
+        const result = []
+        const response = await this.store.getAttributeProjection(table, attribute);
+        const schema = this.getSchema(this.getTableSuffix(table));
+        const attrType = schema.getAttributteType(attribute);
+        for(const entry of response){
+            result.push(entry[attribute][attrType]);
+        }
+        logger.info("[DynamoDbStoreWrapper|getAttributeProjection|out] => %o", result);
+        return result
     };
 
 }

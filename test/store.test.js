@@ -136,4 +136,22 @@ describe('DynamoDbStore tests', () => {
         expect(result.items).toEqual(expect.not.arrayContaining(result2.items));
     }, 30000);
 
+    it('should get some kind of projection', async () => {
+
+        const items = []
+        for(let i=0; i<5; i++){
+            let item = {
+                "id": {"S": faker.string.uuid()},
+                "added": {"N": TS.toString()},
+                "category": {"S": faker.vehicle.model()}
+            }
+            await store.putObj(table, item);
+            items.push(item);  
+        }
+        await setTimeout(5000)
+
+        const result = await store.getAttributeProjection(table, "category");
+        expect(result.length).toEqual(5);
+    }, 60000);
+
 });

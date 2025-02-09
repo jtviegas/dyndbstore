@@ -6,11 +6,25 @@ const { v4 } = require('uuid');
 
 class TestEntity extends AbstractSchema {
 
+    constructor() {
+        super();
+        this.types = {
+            "id": "S",
+            "added": "N",
+            "category": "S",
+            "images": "SS"
+        };
+    }
+    
+    getAttributteType(attribute){
+        return this.types[attribute]
+    }
+
     toEntity(obj){
         return {
             "id": {"S": obj.id},
             "added": {"N": obj.added.toString()},
-            "name": {"S": obj.name},
+            "category": {"S": obj.category},
             "images": {"SS": obj.images}
         }
     }
@@ -19,7 +33,7 @@ class TestEntity extends AbstractSchema {
         return {
             "id": entity.id.S,
             "added": parseInt(entity.added.N),
-            "name": entity.name.S,
+            "category": entity.category.S,
             "images": entity.images.SS
         }
     }
@@ -56,7 +70,7 @@ describe('DynamoDbStoreWrapper tests', () => {
         const obj = {
             "id": ID,
             "added": TS,
-            "name": faker.vehicle.model(),
+            "category": faker.vehicle.model(),
             "images": [ "...", "ndbsjkd"]
         }
         const result = await wrapper.putObj(table, obj);
@@ -67,14 +81,14 @@ describe('DynamoDbStoreWrapper tests', () => {
         const obj = {
             "id": ID,
             "added": TS,
-            "name": faker.vehicle.model(),
+            "category": faker.vehicle.model(),
             "images": [ "...", "ndbsjkd"]
         }
         await wrapper.putObj(table, obj);
         await wrapper.putObj(table, {
                         "id": faker.string.uuid(),
                         "added": TS,
-                        "name": faker.vehicle.model(),
+                        "category": faker.vehicle.model(),
                         "images": [ ".sdasd..", "ndasadsadbsjkd"]
                     });
         await setTimeout(10000)
@@ -88,7 +102,7 @@ describe('DynamoDbStoreWrapper tests', () => {
             let item = {
                 "id": faker.string.uuid(),
                 "added": TS,
-                "name": faker.vehicle.model(),
+                "category": faker.vehicle.model(),
                 "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
             }
             await wrapper.putObj(table, item);
@@ -97,23 +111,23 @@ describe('DynamoDbStoreWrapper tests', () => {
         await setTimeout(5000)
         const result = await wrapper.getObjs(table);
         expect(result.items.length).toEqual(3);
-        expect(result.items.toSorted((a, b) => a.name.localeCompare(b.name))).toEqual(items.toSorted((a, b) => a.name.localeCompare(b.name)));
+        expect(result.items.toSorted((a, b) => a.category.localeCompare(b.category))).toEqual(items.toSorted((a, b) => a.category.localeCompare(b.category)));
     }, 30000);
 
     it('should update a specific item', async () => {
         const item = {
             "id": ID,
             "added": TS,
-            "name": faker.vehicle.model(),
+            "category": faker.vehicle.model(),
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
         }
         await wrapper.putObj(table, item);
         await setTimeout(5000)
-        item.name = "test2"
+        item.category = "test2"
         await wrapper.putObj(table, item);
         await setTimeout(5000)
         const result = await wrapper.getObj(table, ID);
-        expect(result.name).toEqual("test2");
+        expect(result.category).toEqual("test2");
         expect(result).toEqual(item);
     }, 30000);
 
@@ -122,12 +136,12 @@ describe('DynamoDbStoreWrapper tests', () => {
         const items = [
             {"id": ID,
             "added": TS,
-            "name": faker.vehicle.model(),
+            "category": faker.vehicle.model(),
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
             },
             {"id": ID2,
             "added": TS,
-            "name": faker.vehicle.model(),
+            "category": faker.vehicle.model(),
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
             }
         ];
@@ -151,7 +165,7 @@ describe('DynamoDbStoreWrapper tests', () => {
             let item = {
                 "id": faker.string.uuid(),
                 "added": TS,
-                "name": faker.vehicle.model(),
+                "category": faker.vehicle.model(),
                 "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
             }
             await wrapper.putObj(table, item);
@@ -165,6 +179,27 @@ describe('DynamoDbStoreWrapper tests', () => {
         expect(result2.items.length).toEqual(2);
         expect(result.items).toEqual(expect.not.arrayContaining(result2.items));
     }, 30000);
+
+    it('should get some kind of projection', async () => {
+
+        const cats = []
+        for(let i=0; i<5; i++){
+            let item = {
+                "id": faker.string.uuid(),
+                "added": TS,
+                "category": faker.vehicle.model(),
+                "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+            }
+            await wrapper.putObj(table, item);
+            cats.push(item.category);  
+        }
+        await setTimeout(5000)
+        
+        const result = await wrapper.getAttributeProjection(table, "category");
+        expect(result.length).toEqual(5);
+        expect(result.toSorted((a, b) => a.localeCompare(b))).toEqual(cats.toSorted((a, b) => a.localeCompare(b)));
+
+    }, 60000);
 
 })
 
