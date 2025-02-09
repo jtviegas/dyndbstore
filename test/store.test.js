@@ -154,4 +154,38 @@ describe('DynamoDbStore tests', () => {
         expect(result.length).toEqual(5);
     }, 60000);
 
+    it('should get some kind of projection with a filter', async () => {
+
+        await store.putObj(table, {
+            "id": {"S": faker.string.uuid()},
+            "added": {"N": TS.toString()},
+            "category": {"S": "xpto"},
+            "subCategory": {"S": "AAA"}
+        });
+        await store.putObj(table, {
+            "id": {"S": faker.string.uuid()},
+            "added": {"N": TS.toString()},
+            "category": {"S": "xpto"},
+            "subCategory": {"S": "BBB"}
+        });
+
+        const subcats = [{ subCategory: { S: 'BBB' } },
+            { subCategory: { S: 'AAA' } }];
+
+        for(let i=0; i<3; i++){
+            let item = {
+                "id": {"S": faker.string.uuid()},
+                "added": {"N": TS.toString()},
+                "category": {"S": faker.vehicle.model()},
+                "subCategory": {"S": faker.food.adjective()}
+            }
+            await store.putObj(table, item);
+        }
+        await setTimeout(5000)
+
+        const result = await store.getAttributeProjection(table, "subCategory", {"category": {"S": "xpto"}});
+        expect(result.length).toEqual(2);
+        expect(subcats).toEqual(expect.arrayContaining(result));
+    }, 60000);
+
 });

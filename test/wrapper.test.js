@@ -12,6 +12,7 @@ class TestEntity extends AbstractSchema {
             "id": "S",
             "added": "N",
             "category": "S",
+            "subCategory": "S",
             "images": "SS"
         };
     }
@@ -25,6 +26,7 @@ class TestEntity extends AbstractSchema {
             "id": {"S": obj.id},
             "added": {"N": obj.added.toString()},
             "category": {"S": obj.category},
+            "subCategory": {"S": obj.subCategory},
             "images": {"SS": obj.images}
         }
     }
@@ -34,6 +36,7 @@ class TestEntity extends AbstractSchema {
             "id": entity.id.S,
             "added": parseInt(entity.added.N),
             "category": entity.category.S,
+            "subCategory": entity.subCategory.S,
             "images": entity.images.SS
         }
     }
@@ -71,6 +74,7 @@ describe('DynamoDbStoreWrapper tests', () => {
             "id": ID,
             "added": TS,
             "category": faker.vehicle.model(),
+            "subCategory": faker.animal.bird(),
             "images": [ "...", "ndbsjkd"]
         }
         const result = await wrapper.putObj(table, obj);
@@ -82,6 +86,7 @@ describe('DynamoDbStoreWrapper tests', () => {
             "id": ID,
             "added": TS,
             "category": faker.vehicle.model(),
+            "subCategory": faker.animal.bird(),
             "images": [ "...", "ndbsjkd"]
         }
         await wrapper.putObj(table, obj);
@@ -89,6 +94,7 @@ describe('DynamoDbStoreWrapper tests', () => {
                         "id": faker.string.uuid(),
                         "added": TS,
                         "category": faker.vehicle.model(),
+                        "subCategory": faker.animal.bird(),
                         "images": [ ".sdasd..", "ndasadsadbsjkd"]
                     });
         await setTimeout(10000)
@@ -103,6 +109,7 @@ describe('DynamoDbStoreWrapper tests', () => {
                 "id": faker.string.uuid(),
                 "added": TS,
                 "category": faker.vehicle.model(),
+                "subCategory": faker.animal.bird(),
                 "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
             }
             await wrapper.putObj(table, item);
@@ -119,6 +126,7 @@ describe('DynamoDbStoreWrapper tests', () => {
             "id": ID,
             "added": TS,
             "category": faker.vehicle.model(),
+            "subCategory": faker.animal.bird(),
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
         }
         await wrapper.putObj(table, item);
@@ -137,11 +145,13 @@ describe('DynamoDbStoreWrapper tests', () => {
             {"id": ID,
             "added": TS,
             "category": faker.vehicle.model(),
+            "subCategory": faker.animal.bird(),
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
             },
             {"id": ID2,
             "added": TS,
             "category": faker.vehicle.model(),
+            "subCategory": faker.animal.bird(),
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
             }
         ];
@@ -166,6 +176,7 @@ describe('DynamoDbStoreWrapper tests', () => {
                 "id": faker.string.uuid(),
                 "added": TS,
                 "category": faker.vehicle.model(),
+                "subCategory": faker.animal.bird(),
                 "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
             }
             await wrapper.putObj(table, item);
@@ -188,6 +199,7 @@ describe('DynamoDbStoreWrapper tests', () => {
                 "id": faker.string.uuid(),
                 "added": TS,
                 "category": faker.vehicle.model(),
+                "subCategory": faker.animal.bird(),
                 "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
             }
             await wrapper.putObj(table, item);
@@ -199,6 +211,43 @@ describe('DynamoDbStoreWrapper tests', () => {
         expect(result.length).toEqual(5);
         expect(result.toSorted((a, b) => a.localeCompare(b))).toEqual(cats.toSorted((a, b) => a.localeCompare(b)));
 
+    }, 60000);
+
+    it('should get some kind of projection with a filter', async () => {
+
+
+        await wrapper.putObj(table, {
+            "id": faker.string.uuid(),
+            "added": TS,
+            "category": "xpto",
+            "subCategory": "AAA",
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        });
+        await wrapper.putObj(table, {
+            "id": faker.string.uuid(),
+            "added": TS,
+            "category": "xpto",
+            "subCategory": "BBB",
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        });
+
+        const subcats = ['BBB', 'AAA'];
+
+        for(let i=0; i<3; i++){
+            let item = {
+                "id": faker.string.uuid(),
+                "added": TS,
+                "category": faker.vehicle.model(),
+                "subCategory": faker.animal.bird(),
+                "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+            }
+            await wrapper.putObj(table, item);
+        }
+        await setTimeout(5000)
+
+        const result = await wrapper.getAttributeProjection(table, "subCategory", {"category": "xpto"});
+        expect(result.length).toEqual(2);
+        expect(subcats).toEqual(expect.arrayContaining(result));
     }, 60000);
 
 })

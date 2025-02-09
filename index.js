@@ -142,15 +142,27 @@ class DynamoDbStore {
         return response
     };
 
-    async getAttributeProjection (table, attribute) {
-        logger.info("[DynamoDbStore|getAttributeProjection|in] (%s, %s)", table, attribute);
+    async getAttributeProjection (table, attribute, filter) {
+        logger.info("[DynamoDbStore|getAttributeProjection|in] (%s, %s, %s)", table, attribute, filter);
         const result = []
+        let filterExpression = undefined;
+        let expressionAttrValues = undefined;
+        if (filter){
+            const attribute = Reflect.ownKeys(filter)[0];
+            const filterValue = filter[attribute];
+            filterExpression = `${attribute} = :a`;
+            expressionAttrValues = {
+                ":a": filterValue
+            }
+        }
+
         const input= { 
             "TableName": table,
             "ProjectionExpression": attribute,
-            Limit: 3,
+            "FilterExpression": filterExpression,
+            "ExpressionAttributeValues": expressionAttrValues
         };
-        input
+
         let lastEvaluatedKey = "";
         while(lastEvaluatedKey !== undefined){
             const command = new ScanCommand(input);
@@ -340,11 +352,19 @@ class DynamoDbStoreWrapper {
         logger.info("[DynamoDbStoreWrapper|delObj|out] => %o", response);
     };
 
-    async getAttributeProjection (table, attribute) {
-        logger.info("[DynamoDbStoreWrapper|getAttributeProjection|in] (%s, %s)", table, attribute);
+    async getAttributeProjection (table, attribute, filter) {
+        logger.info("[DynamoDbStoreWrapper|getAttributeProjection|in] (%s, %s, %s)", table, attribute, filter);
         const result = []
-        const response = await this.store.getAttributeProjection(table, attribute);
         const schema = this.getSchema(this.getTableSuffix(table));
+        let filterWrapper = undefined
+        if(filter){
+            const filterAttribute = Reflect.ownKeys(filter)[0];
+            const filterAttributeType = schema.getAttributteType(filterAttribute);
+            filterWrapper = {}
+            filterWrapper[filterAttribute] = {}
+            filterWrapper[filterAttribute][filterAttributeType] = filter[filterAttribute]
+        }
+        const response = await this.store.getAttributeProjection(table, attribute, filterWrapper);
         const attrType = schema.getAttributteType(attribute);
         for(const entry of response){
             result.push(entry[attribute][attrType]);
