@@ -188,4 +188,57 @@ describe('DynamoDbStore tests', () => {
         expect(subcats).toEqual(expect.arrayContaining(result));
     }, 60000);
 
+    it('should get the subAttribute map', async () => {
+
+        await store.putObj(table, {
+            "id": {"S": faker.string.uuid()},
+            "added": {"N": TS.toString()},
+            "category": {"S": "xpto"},
+            "subCategory": {"S": "AAA"}
+        });
+        await store.putObj(table, {
+            "id": {"S": faker.string.uuid()},
+            "added": {"N": TS.toString()},
+            "category": {"S": "xpto"},
+            "subCategory": {"S": "BBB"}
+        });
+        await store.putObj(table, {
+            "id": {"S": faker.string.uuid()},
+            "added": {"N": TS.toString()},
+            "category": {"S": "abcd"},
+            "subCategory": {"S": "BBB"}
+        });
+        await store.putObj(table, {
+            "id": {"S": faker.string.uuid()},
+            "added": {"N": TS.toString()},
+            "category": {"S": "abcd"}
+        });
+        await store.putObj(table, {
+            "id": {"S": faker.string.uuid()},
+            "added": {"N": TS.toString()},
+            "category": {"S": "xyzw"}
+        });
+
+        await setTimeout(5000)
+        const expected = [
+            {
+                category: { S: 'abcd' },
+                subCategory: [ { S: 'BBB' } ]
+            },
+            {
+                category: { S: 'xpto' },
+                subCategory: [ { S: 'AAA' }, { S: 'BBB' }]
+            },
+            {
+                category: { S: 'xyzw' },
+                subCategory: []
+            }
+          ];
+        // sort the result before comparing
+        const result = (await store.getSubAttributeMap(table, "category", "subCategory")).toSorted((a, b) => a.category.S.localeCompare(b.category.S));
+        result[1]["subCategory"] = (result[1]["subCategory"]).toSorted((a, b) => a.S.localeCompare(b.S))
+        expect(result.length).toEqual(3);
+        expect(expected).toEqual(expect.arrayContaining(result));
+    }, 60000);
+
 });

@@ -250,5 +250,56 @@ describe('DynamoDbStoreWrapper tests', () => {
         expect(subcats).toEqual(expect.arrayContaining(result));
     }, 60000);
 
+    it('should get the subAttribute map', async () => {
+
+        await wrapper.putObj(table, {
+            "id": faker.string.uuid(),
+            "added": TS,
+            "category": "xpto",
+            "subCategory": "AAA",
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        });
+        await wrapper.putObj(table, {
+            "id": faker.string.uuid(),
+            "added": TS,
+            "category": "xpto",
+            "subCategory":  "BBB",
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        });
+        await wrapper.putObj(table, {
+            "id": faker.string.uuid(),
+            "added": TS,
+            "category": "abcd",
+            "subCategory": "BBB",
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        });
+        await wrapper.putObj(table, {
+            "id": faker.string.uuid(),
+            "added": TS,
+            "category": "abcd",
+            "subCategory":  "tty",
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        });
+        await wrapper.putObj(table, {
+            "id": faker.string.uuid(),
+            "added": TS,
+            "category": "xyzw",
+            "subCategory":  "tty",
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        });
+
+        await setTimeout(5000)
+        const expected = {'abcd': ['tty', 'BBB'], 'xpto': ['AAA', 'BBB'], 'xyzw': ['tty']};
+        // sort the result before comparing
+        const result = await wrapper.getSubAttributeMap(table, "category", "subCategory");
+        for(key in result){
+            subs = result[key]
+            result[key] = subs.toSorted((a, b) => a.localeCompare(b));
+            expect(result[key]).toEqual(expect.arrayContaining(expected[key]));
+        }
+        expect(Object.keys(result).length).toEqual(3);
+        expect(Object.keys(expected)).toEqual(expect.arrayContaining(Object.keys(result)));
+    }, 60000);
+
 })
 

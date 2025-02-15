@@ -179,6 +179,57 @@ class DynamoDbStore {
         logger.info("[DynamoDbStore|getAttributeProjection|out] => %o", result);
         return result
     };
+
+    mapSubAttributes(items, attribute, subAttribute){
+        logger.info("[DynamoDbStore|mapSubAttributes|in] (%o, %s, %s)", items, attribute, subAttribute);
+        const mapping = {};
+        for(const item of items){
+            const attKey = JSON.stringify(item[attribute])
+            if (! Object.hasOwn(mapping, attKey)){
+                mapping[attKey] = new Set()
+            }
+            if(Object.hasOwn(item, subAttribute)){
+                (mapping[attKey]).add(item[subAttribute])
+            }
+        }
+        logger.info("[DynamoDbStore|mapSubAttributes] mapping: %o", mapping);
+        const result = []
+        for(const key in mapping){
+            const entry = {}
+            entry[attribute] = JSON.parse(key)
+            entry[subAttribute] = [...mapping[key]]
+            result.push(entry)
+        }
+        logger.info("[DynamoDbStore|mapSubAttributes|out] => %o", result);
+        return result
+    }
+
+    async getSubAttributeMap (table, attribute, subAttribute) {
+        logger.info("[DynamoDbStore|getSubAttributeMap|in] (%s, %s, %s)", table, attribute, subAttribute);
+        const items = []
+
+        const input= { 
+            "TableName": table,
+            "ProjectionExpression": `${attribute}, ${subAttribute}`
+        };
+
+        let lastEvaluatedKey = "";
+        while(lastEvaluatedKey !== undefined){
+            const command = new ScanCommand(input);
+            logger.info("[DynamoDbStore|getSubAttributeMap] scanning with lastKey: %s", lastEvaluatedKey);
+            const response = await this.client.send(command);
+            logger.info("[DynamoDbStore|getSubAttributeMap] response: %o", response);
+            lastEvaluatedKey = response.LastEvaluatedKey;
+
+            items.push(...response.Items);
+            if(lastEvaluatedKey !== undefined){
+                input.ExclusiveStartKey = lastEvaluatedKey;
+            } 
+        }
+        const result = this.mapSubAttributes(items, attribute, subAttribute)
+        logger.info("[DynamoDbStore|getSubAttributeMap|out] => %o", result);
+        return result
+    };
 }
 
 class AbstractSchema {
@@ -370,6 +421,26 @@ class DynamoDbStoreWrapper {
             result.push(entry[attribute][attrType]);
         }
         logger.info("[DynamoDbStoreWrapper|getAttributeProjection|out] => %o", result);
+        return result
+    };
+
+    async getSubAttributeMap (table, attribute, subAttribute) {
+        logger.info("[DynamoDbStoreWrapper|getSubAttributeMap|in] (%s, %s, %s)", table, attribute, subAttribute);
+        const result = {}
+        const schema = this.getSchema(this.getTableSuffix(table));
+        
+        const response = await this.store.getSubAttributeMap(table, attribute, subAttribute);
+        const attrType = schema.getAttributteType(attribute);
+        const subAttrType = schema.getAttributteType(subAttribute);
+        for(const entry of response){
+            const attrValue = entry[attribute][attrType]
+            const subAttrValues = []
+            for( const subAtt of entry[subAttribute] ){
+                subAttrValues.push(subAtt[subAttrType])
+            }
+            result[attrValue] = subAttrValues;
+        }
+        logger.info("[DynamoDbStoreWrapper|getSubAttributeMap|out] => %o", result);
         return result
     };
 
