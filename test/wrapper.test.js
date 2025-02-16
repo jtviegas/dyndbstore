@@ -22,13 +22,16 @@ class TestEntity extends AbstractSchema {
     }
 
     toEntity(obj){
-        return {
-            "id": {"S": obj.id},
+        const result = {
             "added": {"N": obj.added.toString()},
             "category": {"S": obj.category},
             "subCategory": {"S": obj.subCategory},
             "images": {"SS": obj.images}
         }
+        if(obj.id){
+            result.id = {"S": obj.id}
+        }
+        return result
     }
 
     fromEntity(entity){
@@ -79,6 +82,22 @@ describe('DynamoDbStoreWrapper tests', () => {
         }
         const result = await wrapper.putObj(table, obj);
         expect(result).toEqual(obj);
+    }, 30000);
+
+    it('should post a new item', async () => {
+        const obj = {
+            "added": TS,
+            "category": faker.vehicle.model(),
+            "subCategory": faker.animal.bird(),
+            "images": [ "...", "ndbsjkd"]
+        }
+        const response = await wrapper.postObj(table, obj);
+        await setTimeout(10000)
+        expect(response.added).toEqual(obj.added);
+        expect(response.category).toEqual(obj.category);
+        expect(response.subCategory).toEqual(obj.subCategory);
+        expect(response.images).toEqual(obj.images);
+
     }, 30000);
 
     it('should get a specific item', async () => {

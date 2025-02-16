@@ -28,6 +28,16 @@ describe('DynamoDbStore tests', () => {
     }, 30000);
 
 
+    it('should post an item', async () => {
+        const item = {
+            "added": {"N": TS.toString()},
+            "name": {"S": "test"}
+        }
+        const result = await store.postObj(table, item);
+        expect(result.added.N).toEqual(item.added.N);
+        expect(result.name.S).toEqual(item.name.S);
+    }, 30000);
+
     it('should put an item', async () => {
         const item = {
             "id": {"S": ID},

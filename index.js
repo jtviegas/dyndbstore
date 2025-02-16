@@ -1,4 +1,5 @@
 const winston = require('winston');
+const { v4 } = require('uuid');
 const { 
     DynamoDBClient, DeleteTableCommand, ListTablesCommand, CreateTableCommand,
     PutItemCommand, GetItemCommand, ScanCommand, DeleteItemCommand, DescribeTableCommand
@@ -16,8 +17,6 @@ const logger = winston.createLogger({
     transports: [new winston.transports.Console()],
     exitOnError: false
 });
-
-
 
 
 
@@ -84,6 +83,16 @@ class DynamoDbStore {
         logger.info("[DynamoDbStore|createTableWithId|out]");
     };
 
+    async postObj (table, obj) {
+        logger.info("[DynamoDbStore|postObj|in] (%s, %o)", table, obj);
+        if(! Object.hasOwn(obj, "id") ){
+            obj.id = {"S": v4()} ;
+        }
+        const result = await this.putObj(table, obj);
+        logger.info("[DynamoDbStore|postObj|out] (%o)", result)
+        return result
+    };
+
     async putObj (table, obj) {
         logger.info("[DynamoDbStore|putObj|in] (%s, %o)", table, obj);
         const input= { 
@@ -94,7 +103,10 @@ class DynamoDbStore {
         const command = new PutItemCommand(input);
         const response = await this.client.send(command);
         logger.info("[DynamoDbStore|putObj] (%o)", response)
-        const result = response["ConsumedCapacity"]["CapacityUnits"] === 1 ? obj : undefined;
+        if (0 === response["ConsumedCapacity"]["CapacityUnits"]){
+            throw new Error("[DynamoDbStore|putObj|in] no capacity consumed in the operation");
+        }
+        const result = obj;
         logger.info("[DynamoDbStore|putObj|out] (%o)", result)
         return result
     };
@@ -266,7 +278,6 @@ class SimpleItemEntity extends AbstractSchema {
 
     toEntity(obj){
         const result =  {
-            "id": {"S": obj.id},
             "name": {"S": obj.name},
             "description": {"S": obj.description},
             "price": {"N": obj.price.toString()},
@@ -274,6 +285,9 @@ class SimpleItemEntity extends AbstractSchema {
             "category": {"S": obj.category},
             "subCategory": {"S": obj.subCategory},
             "images": {"L": []}
+        }
+        if(obj.id){
+            result.id = {"S": obj.id}
         }
         for(const img of obj.images){
             result.images.L.push(
@@ -364,11 +378,20 @@ class DynamoDbStoreWrapper {
         return result
     }
 
+    async postObj (table, obj) {
+        logger.info("[DynamoDbStoreWrapper|postObj|in] (%s, %o)", table, obj);
+        const schema = this.getSchema(this.getTableSuffix(table))
+        const response = await this.store.postObj(table, schema.toEntity(obj));
+        const result = schema.fromEntity(response);
+        logger.info("[DynamoDbStoreWrapper|postObj|out] (%o)", result)
+        return result
+    };
+
     async putObj (table, obj) {
         logger.info("[DynamoDbStoreWrapper|putObj|in] (%s, %o)", table, obj);
         const schema = this.getSchema(this.getTableSuffix(table))
         const response = await this.store.putObj(table, schema.toEntity(obj));
-        const result = response ? schema.fromEntity(response) : undefined
+        const result = schema.fromEntity(response);
         logger.info("[DynamoDbStoreWrapper|putObj|out] (%o)", result)
         return result
     };
