@@ -1,6 +1,6 @@
 {
   "name": "@jtviegas/dyndbstore",
-  "version": "3.2.1",
+  "version": "3.3.0",
   "description": "store facade to a database, currently only DynamoDb implementation",
   "main": "index.js",
   "scripts": {

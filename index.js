@@ -1,7 +1,7 @@
 const winston = require('winston');
 const { v4 } = require('uuid');
 const { 
-    DynamoDBClient, DeleteTableCommand, ListTablesCommand, CreateTableCommand,
+    DynamoDBClient, DeleteTableCommand, ListTablesCommand, CreateTableCommand, QueryCommand,
     PutItemCommand, GetItemCommand, ScanCommand, DeleteItemCommand, DescribeTableCommand
 } = require("@aws-sdk/client-dynamodb");
 
@@ -18,7 +18,17 @@ const logger = winston.createLogger({
     exitOnError: false
 });
 
+class StoreException extends Error {
+    constructor(message) {
+        super(message);
+    }
+}
 
+class NoEntityStoreException extends StoreException {
+    constructor(message) {
+        super(message);
+    }
+}
 
 class DynamoDbStore {
 
@@ -59,13 +69,22 @@ class DynamoDbStore {
         return result
     };
 
-    async createTableWithId(table) {
-        logger.info("[DynamoDbStore|createTableWithId|in] (%s)", table);
+    async createTable(table) {
+        logger.info("[DynamoDbStore|createTable|in] (%s)", table);
 
         const input = {
-            AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }],
+            AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }, { AttributeName: 'ts', AttributeType: 'N' }, { AttributeName: 'index_sort', AttributeType: 'N' }],
             TableName: table,
-            KeySchema: [ { AttributeName: 'id', KeyType: 'HASH' } ],
+            KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+            GlobalSecondaryIndexes: [
+                {
+                    IndexName: "INDEX_SORT",
+                    KeySchema: [ { AttributeName: 'index_sort', KeyType: 'HASH' }, { AttributeName: 'ts', KeyType: 'RANGE' } ],
+                    Projection: {
+                        ProjectionType: "ALL",
+                      }
+                }
+            ],
             BillingMode: "PAY_PER_REQUEST",
             DeletionProtectionEnabled: false,
             SSESpecification: {
@@ -78,23 +97,27 @@ class DynamoDbStore {
         };
         const command = new CreateTableCommand(input);
         const response = await this.client.send(command);
-        logger.info("[DynamoDbStore|createTableWithId] response: %o", response);
+        logger.info("[DynamoDbStore|createTable] response: %o", response);
 
-        logger.info("[DynamoDbStore|createTableWithId|out]");
+        logger.info("[DynamoDbStore|createTable|out]");
     };
 
     async postObj (table, obj) {
         logger.info("[DynamoDbStore|postObj|in] (%s, %o)", table, obj);
-        if(! Object.hasOwn(obj, "id") ){
-            obj.id = {"S": v4()} ;
-        }
+
+        obj.index_sort || (obj.index_sort = {"N": "0"})
+        obj.id || (obj.id = {"S": v4()})
+
         const result = await this.putObj(table, obj);
+        delete result.index_sort;
         logger.info("[DynamoDbStore|postObj|out] (%o)", result)
         return result
     };
 
     async putObj (table, obj) {
         logger.info("[DynamoDbStore|putObj|in] (%s, %o)", table, obj);
+        
+        obj.index_sort || (obj.index_sort={"N": "0"})
         const input= { 
             "Item": obj,
             "TableName": table, 
@@ -106,6 +129,7 @@ class DynamoDbStore {
         if (0 === response["ConsumedCapacity"]["CapacityUnits"]){
             throw new Error("[DynamoDbStore|putObj|in] no capacity consumed in the operation");
         }
+        delete obj.index_sort;
         const result = obj;
         logger.info("[DynamoDbStore|putObj|out] (%o)", result)
         return result
@@ -119,25 +143,37 @@ class DynamoDbStore {
           };
         const command = new GetItemCommand(input);
         const response = await this.client.send(command);
-
+        if (!Object.hasOwn(response, "Item")){
+            throw new NoEntityStoreException(`[DynamoDbStore|getObj] no entity with key: ${key}`)
+        }
+        delete response.Item.index_sort;
         logger.info("[DynamoDbStore|getObj|out] => %o", response);
         return response["Item"]
     };
 
-    async getObjs (table, key) {
-        logger.info("[DynamoDbStore|getObjs|in] (%s, %s)", table, key);
+    async getObjs(table, lastKey, desc=true) {
+        logger.info("[DynamoDbStore|getObjs|in] (%s, %s, %s)", table, lastKey, desc);
         const input= { 
             "TableName": table,
-            "Limit": this.scanLimit
+            "Limit": this.scanLimit,
+            "IndexName": "INDEX_SORT", 
+            "ExpressionAttributeValues": {":a": {"N": "0".toString()}},
+            "KeyConditionExpression": "index_sort = :a",
+            "ScanIndexForward": !desc,
+            "ExclusiveStartKey": lastKey || undefined
         };
-        input.ExclusiveStartKey = key || undefined
 
-        const command = new ScanCommand(input);
+        const command = new QueryCommand(input);
         const response = await this.client.send(command);
+        response.Items.forEach((o) => {
+            delete o.index_sort;
+        })
+
         const result = { 
             "items": response.Items,
             "lastKey": response.LastEvaluatedKey || undefined
          }
+
         logger.info("[DynamoDbStore|getObjs|out] => %o", result);
         return result
     };
@@ -265,7 +301,7 @@ class SimpleItemEntity extends AbstractSchema {
             "name": "S",
             "description": "S",
             "price": "N",
-            "added": "N",
+            "ts": "N",
             "category": "S",
             "subCategory": "S",
             "images": "L"
@@ -281,7 +317,7 @@ class SimpleItemEntity extends AbstractSchema {
             "name": {"S": obj.name},
             "description": {"S": obj.description},
             "price": {"N": obj.price.toString()},
-            "added": {"N": obj.added.toString()},
+            "ts": {"N": obj.ts.toString()},
             "category": {"S": obj.category},
             "subCategory": {"S": obj.subCategory},
             "images": {"L": []}
@@ -307,7 +343,7 @@ class SimpleItemEntity extends AbstractSchema {
             "name": entity.name.S,
             "description": entity.description.S,
             "price": parseInt(entity.price.N),
-            "added": parseInt(entity.added.N),
+            "ts": parseInt(entity.ts.N),
             "category": entity.category.S,
             "subCategory": entity.subCategory.S,
             "images": []
@@ -361,7 +397,7 @@ class DynamoDbStoreWrapper {
 
     async createTable(name) {
         logger.info("[DynamoDbStoreWrapper|createTable|in] (%s)", name);
-        await this.store.createTableWithId(name);
+        await this.store.createTable(name);
         logger.info("[DynamoDbStoreWrapper|createTable|out]");
     }
 

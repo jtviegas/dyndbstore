@@ -16,7 +16,7 @@ describe('DynamoDbStoreWrapper with SimpleItemEntity tests', () => {
         "name": faker.vehicle.model(),
         "description": faker.string.alpha({ length: { min: 5, max: 20 } }) ,
         "price": faker.number.int({ max: 100 }),
-        "added": TS,
+        "ts": TS,
         "category": faker.animal.bear(),
         "subCategory": faker.animal.bird(),
         "images": [

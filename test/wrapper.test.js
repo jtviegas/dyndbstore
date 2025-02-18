@@ -10,7 +10,7 @@ class TestEntity extends AbstractSchema {
         super();
         this.types = {
             "id": "S",
-            "added": "N",
+            "ts": "N",
             "category": "S",
             "subCategory": "S",
             "images": "SS"
@@ -23,7 +23,7 @@ class TestEntity extends AbstractSchema {
 
     toEntity(obj){
         const result = {
-            "added": {"N": obj.added.toString()},
+            "ts": {"N": obj.ts.toString()},
             "category": {"S": obj.category},
             "subCategory": {"S": obj.subCategory},
             "images": {"SS": obj.images}
@@ -37,7 +37,7 @@ class TestEntity extends AbstractSchema {
     fromEntity(entity){
         return {
             "id": entity.id.S,
-            "added": parseInt(entity.added.N),
+            "ts": parseInt(entity.ts.N),
             "category": entity.category.S,
             "subCategory": entity.subCategory.S,
             "images": entity.images.SS
@@ -75,7 +75,7 @@ describe('DynamoDbStoreWrapper tests', () => {
     it('should put an item', async () => {
         const obj = {
             "id": ID,
-            "added": TS,
+            "ts": TS,
             "category": faker.vehicle.model(),
             "subCategory": faker.animal.bird(),
             "images": [ "...", "ndbsjkd"]
@@ -86,14 +86,14 @@ describe('DynamoDbStoreWrapper tests', () => {
 
     it('should post a new item', async () => {
         const obj = {
-            "added": TS,
+            "ts": TS,
             "category": faker.vehicle.model(),
             "subCategory": faker.animal.bird(),
             "images": [ "...", "ndbsjkd"]
         }
         const response = await wrapper.postObj(table, obj);
         await setTimeout(10000)
-        expect(response.added).toEqual(obj.added);
+        expect(response.ts).toEqual(obj.ts);
         expect(response.category).toEqual(obj.category);
         expect(response.subCategory).toEqual(obj.subCategory);
         expect(response.images).toEqual(obj.images);
@@ -103,7 +103,7 @@ describe('DynamoDbStoreWrapper tests', () => {
     it('should get a specific item', async () => {
         const obj = {
             "id": ID,
-            "added": TS,
+            "ts": TS,
             "category": faker.vehicle.model(),
             "subCategory": faker.animal.bird(),
             "images": [ "...", "ndbsjkd"]
@@ -111,7 +111,7 @@ describe('DynamoDbStoreWrapper tests', () => {
         await wrapper.putObj(table, obj);
         await wrapper.putObj(table, {
                         "id": faker.string.uuid(),
-                        "added": TS,
+                        "ts": TS,
                         "category": faker.vehicle.model(),
                         "subCategory": faker.animal.bird(),
                         "images": [ ".sdasd..", "ndasadsadbsjkd"]
@@ -126,7 +126,7 @@ describe('DynamoDbStoreWrapper tests', () => {
         for(let i=0; i<3; i++){
             let item = {
                 "id": faker.string.uuid(),
-                "added": TS,
+                "ts": TS,
                 "category": faker.vehicle.model(),
                 "subCategory": faker.animal.bird(),
                 "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
@@ -143,7 +143,7 @@ describe('DynamoDbStoreWrapper tests', () => {
     it('should update a specific item', async () => {
         const item = {
             "id": ID,
-            "added": TS,
+            "ts": TS,
             "category": faker.vehicle.model(),
             "subCategory": faker.animal.bird(),
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
@@ -162,13 +162,13 @@ describe('DynamoDbStoreWrapper tests', () => {
         const ID2 = faker.string.uuid();
         const items = [
             {"id": ID,
-            "added": TS,
+            "ts": TS,
             "category": faker.vehicle.model(),
             "subCategory": faker.animal.bird(),
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
             },
             {"id": ID2,
-            "added": TS,
+            "ts": TS,
             "category": faker.vehicle.model(),
             "subCategory": faker.animal.bird(),
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
@@ -193,7 +193,7 @@ describe('DynamoDbStoreWrapper tests', () => {
         for(let i=0; i<5; i++){
             let item = {
                 "id": faker.string.uuid(),
-                "added": TS,
+                "ts": TS,
                 "category": faker.vehicle.model(),
                 "subCategory": faker.animal.bird(),
                 "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
@@ -216,7 +216,7 @@ describe('DynamoDbStoreWrapper tests', () => {
         for(let i=0; i<5; i++){
             let item = {
                 "id": faker.string.uuid(),
-                "added": TS,
+                "ts": TS,
                 "category": faker.vehicle.model(),
                 "subCategory": faker.animal.bird(),
                 "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
@@ -237,14 +237,14 @@ describe('DynamoDbStoreWrapper tests', () => {
 
         await wrapper.putObj(table, {
             "id": faker.string.uuid(),
-            "added": TS,
+            "ts": TS,
             "category": "xpto",
             "subCategory": "AAA",
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
         });
         await wrapper.putObj(table, {
             "id": faker.string.uuid(),
-            "added": TS,
+            "ts": TS,
             "category": "xpto",
             "subCategory": "BBB",
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
@@ -255,7 +255,7 @@ describe('DynamoDbStoreWrapper tests', () => {
         for(let i=0; i<3; i++){
             let item = {
                 "id": faker.string.uuid(),
-                "added": TS,
+                "ts": TS,
                 "category": faker.vehicle.model(),
                 "subCategory": faker.animal.bird(),
                 "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
@@ -273,35 +273,35 @@ describe('DynamoDbStoreWrapper tests', () => {
 
         await wrapper.putObj(table, {
             "id": faker.string.uuid(),
-            "added": TS,
+            "ts": TS,
             "category": "xpto",
             "subCategory": "AAA",
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
         });
         await wrapper.putObj(table, {
             "id": faker.string.uuid(),
-            "added": TS,
+            "ts": TS,
             "category": "xpto",
             "subCategory":  "BBB",
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
         });
         await wrapper.putObj(table, {
             "id": faker.string.uuid(),
-            "added": TS,
+            "ts": TS,
             "category": "abcd",
             "subCategory": "BBB",
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
         });
         await wrapper.putObj(table, {
             "id": faker.string.uuid(),
-            "added": TS,
+            "ts": TS,
             "category": "abcd",
             "subCategory":  "tty",
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
         });
         await wrapper.putObj(table, {
             "id": faker.string.uuid(),
-            "added": TS,
+            "ts": TS,
             "category": "xyzw",
             "subCategory":  "tty",
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]

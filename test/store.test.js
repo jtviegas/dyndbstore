@@ -14,7 +14,7 @@ describe('DynamoDbStore tests', () => {
 
     beforeEach(async () => {
         table = `test_table_${(new Date()).getTime()}`
-        await store.createTableWithId(table);
+        await store.createTable(table);
         await setTimeout(10000)
     }, 30000);
 
@@ -30,18 +30,18 @@ describe('DynamoDbStore tests', () => {
 
     it('should post an item', async () => {
         const item = {
-            "added": {"N": TS.toString()},
+            "ts": {"N": TS.toString()},
             "name": {"S": "test"}
         }
         const result = await store.postObj(table, item);
-        expect(result.added.N).toEqual(item.added.N);
+        expect(result.ts.N).toEqual(item.ts.N);
         expect(result.name.S).toEqual(item.name.S);
     }, 30000);
 
     it('should put an item', async () => {
         const item = {
             "id": {"S": ID},
-            "added": {"N": TS.toString()},
+            "ts": {"N": TS.toString()},
             "name": {"S": "test"}
         }
         const result = await store.putObj(table, item);
@@ -51,19 +51,20 @@ describe('DynamoDbStore tests', () => {
     it('should get a specific item', async () => {
         const item = {
             "id": {"S": ID},
-            "added": {"N": TS.toString()},
+            "ts": {"N": TS.toString()},
             "name": {"S": "test"}
         }
         await store.putObj(table, item);
         await store.putObj(table, {
                         "id": {"S": faker.string.uuid()},
-                        "added": {"N": TS.toString()},
+                        "ts": {"N": TS.toString()},
                         "name": {"S": faker.vehicle.model()}
                     });
         await setTimeout(10000)
         const result = await store.getObj(table, {
             "id": {"S": ID}
         });
+
         expect(result).toEqual(item);
     }, 30000);
 
@@ -72,7 +73,7 @@ describe('DynamoDbStore tests', () => {
         for(let i=0; i<3; i++){
             let item = {
                 "id": {"S": faker.string.uuid()},
-                "added": {"N": TS.toString()},
+                "ts": {"N": TS.toString()},
                 "name": {"S": faker.vehicle.model()}
             }
             await store.putObj(table, item);
@@ -87,7 +88,7 @@ describe('DynamoDbStore tests', () => {
     it('should update a specific item', async () => {
         const item = {
             "id": {"S": ID},
-            "added": {"N": TS.toString()},
+            "ts": {"N": TS.toString()},
             "name": {"S": "test"}
         }
         await store.putObj(table, item);
@@ -106,10 +107,10 @@ describe('DynamoDbStore tests', () => {
         const ID2 = faker.string.uuid();
         const items = [
             {"id": {"S": ID},
-            "added": {"N": TS.toString()},
+            "ts": {"N": TS.toString()},
             "name": {"S": "test"}},
             {"id": {"S": ID2},
-                "added": {"N": TS.toString()},
+                "ts": {"N": TS.toString()},
                 "name": {"S": faker.vehicle.model()}}
         ];
         for(let item of items){
@@ -131,7 +132,7 @@ describe('DynamoDbStore tests', () => {
         for(let i=0; i<5; i++){
             let item = {
                 "id": {"S": faker.string.uuid()},
-                "added": {"N": TS.toString()},
+                "ts": {"N": TS.toString()},
                 "name": {"S": faker.vehicle.model()}
             }
             await store.putObj(table, item);
@@ -152,7 +153,7 @@ describe('DynamoDbStore tests', () => {
         for(let i=0; i<5; i++){
             let item = {
                 "id": {"S": faker.string.uuid()},
-                "added": {"N": TS.toString()},
+                "ts": {"N": TS.toString()},
                 "category": {"S": faker.vehicle.model()}
             }
             await store.putObj(table, item);
@@ -168,13 +169,13 @@ describe('DynamoDbStore tests', () => {
 
         await store.putObj(table, {
             "id": {"S": faker.string.uuid()},
-            "added": {"N": TS.toString()},
+            "ts": {"N": TS.toString()},
             "category": {"S": "xpto"},
             "subCategory": {"S": "AAA"}
         });
         await store.putObj(table, {
             "id": {"S": faker.string.uuid()},
-            "added": {"N": TS.toString()},
+            "ts": {"N": TS.toString()},
             "category": {"S": "xpto"},
             "subCategory": {"S": "BBB"}
         });
@@ -185,7 +186,7 @@ describe('DynamoDbStore tests', () => {
         for(let i=0; i<3; i++){
             let item = {
                 "id": {"S": faker.string.uuid()},
-                "added": {"N": TS.toString()},
+                "ts": {"N": TS.toString()},
                 "category": {"S": faker.vehicle.model()},
                 "subCategory": {"S": faker.food.adjective()}
             }
@@ -202,30 +203,30 @@ describe('DynamoDbStore tests', () => {
 
         await store.putObj(table, {
             "id": {"S": faker.string.uuid()},
-            "added": {"N": TS.toString()},
+            "ts": {"N": TS.toString()},
             "category": {"S": "xpto"},
             "subCategory": {"S": "AAA"}
         });
         await store.putObj(table, {
             "id": {"S": faker.string.uuid()},
-            "added": {"N": TS.toString()},
+            "ts": {"N": TS.toString()},
             "category": {"S": "xpto"},
             "subCategory": {"S": "BBB"}
         });
         await store.putObj(table, {
             "id": {"S": faker.string.uuid()},
-            "added": {"N": TS.toString()},
+            "ts": {"N": TS.toString()},
             "category": {"S": "abcd"},
             "subCategory": {"S": "BBB"}
         });
         await store.putObj(table, {
             "id": {"S": faker.string.uuid()},
-            "added": {"N": TS.toString()},
+            "ts": {"N": TS.toString()},
             "category": {"S": "abcd"}
         });
         await store.putObj(table, {
             "id": {"S": faker.string.uuid()},
-            "added": {"N": TS.toString()},
+            "ts": {"N": TS.toString()},
             "category": {"S": "xyzw"}
         });
 
