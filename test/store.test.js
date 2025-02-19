@@ -15,14 +15,14 @@ describe('DynamoDbStore tests', () => {
     beforeEach(async () => {
         table = `test_table_${(new Date()).getTime()}`
         await store.createTable(table);
-        await setTimeout(10000)
+        await setTimeout(2000)
     }, 30000);
 
     it('should check creation and deletion of table', async () => {
         let isTableResult = await store.isTable(table);
         expect(isTableResult).toEqual(true);
         await store.dropTable(table);
-        await setTimeout(10000)
+        await setTimeout(2000)
         isTableResult = await store.isTable(table);
         expect(isTableResult).toEqual(false);
     }, 30000);
@@ -60,7 +60,7 @@ describe('DynamoDbStore tests', () => {
                         "ts": {"N": TS.toString()},
                         "name": {"S": faker.vehicle.model()}
                     });
-        await setTimeout(10000)
+        await setTimeout(2000)
         const result = await store.getObj(table, {
             "id": {"S": ID}
         });
@@ -79,7 +79,7 @@ describe('DynamoDbStore tests', () => {
             await store.putObj(table, item);
             items.push(item);  
         }
-        await setTimeout(5000)
+        await setTimeout(2000)
         const result = await store.getObjs(table);
         expect(result.items.length).toEqual(3);
         expect(result.items.toSorted((a, b) => a.name.S.localeCompare(b.name.S))).toEqual(items.toSorted((a, b) => a.name.S.localeCompare(b.name.S)));
@@ -92,10 +92,10 @@ describe('DynamoDbStore tests', () => {
             "name": {"S": "test"}
         }
         await store.putObj(table, item);
-        await setTimeout(5000)
+        await setTimeout(2000)
         item.name.S = "test2"
         await store.putObj(table, item);
-        await setTimeout(5000)
+        await setTimeout(2000)
         const result = await store.getObj(table, {
             "id": {"S": ID}
         });
@@ -116,9 +116,9 @@ describe('DynamoDbStore tests', () => {
         for(let item of items){
             await store.putObj(table, item);
         }
-        await setTimeout(5000)
+        await setTimeout(2000)
         await store.delObj(table, {"id": {"S": ID}});
-        await setTimeout(5000)
+        await setTimeout(2000)
 
         const result = await store.getObjs(table);
         expect(result.items.length).toEqual(1);
@@ -138,7 +138,7 @@ describe('DynamoDbStore tests', () => {
             await store.putObj(table, item);
             items.push(item);  
         }
-        await setTimeout(5000)
+        await setTimeout(2000)
         const result = await store.getObjs(table);
         expect(result.items.length).toEqual(3);
         expect(result.lastKey).not.toEqual(undefined);
@@ -159,7 +159,7 @@ describe('DynamoDbStore tests', () => {
             await store.putObj(table, item);
             items.push(item);  
         }
-        await setTimeout(5000)
+        await setTimeout(2000)
 
         const result = await store.getAttributeProjection(table, "category");
         expect(result.length).toEqual(5);
@@ -192,7 +192,7 @@ describe('DynamoDbStore tests', () => {
             }
             await store.putObj(table, item);
         }
-        await setTimeout(5000)
+        await setTimeout(2000)
 
         const result = await store.getAttributeProjection(table, "subCategory", {"category": {"S": "xpto"}});
         expect(result.length).toEqual(2);
@@ -230,7 +230,7 @@ describe('DynamoDbStore tests', () => {
             "category": {"S": "xyzw"}
         });
 
-        await setTimeout(5000)
+        await setTimeout(2000)
         const expected = [
             {
                 category: { S: 'abcd' },

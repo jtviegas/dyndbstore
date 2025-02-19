@@ -58,10 +58,10 @@ describe('DynamoDbStoreWrapper tests', () => {
         await wrapper.createTable(table);
         let status = 'CREATING'
         while( 'CREATING' === status ){         
-            await setTimeout(5000)
+            await setTimeout(2000)
             status = await wrapper.getTableStatus(table);
         }
-        await setTimeout(10000)
+        await setTimeout(2000)
     }, 50000);
 
     it('should check creation and deletion of table', async () => {
@@ -92,7 +92,7 @@ describe('DynamoDbStoreWrapper tests', () => {
             "images": [ "...", "ndbsjkd"]
         }
         const response = await wrapper.postObj(table, obj);
-        await setTimeout(10000)
+        await setTimeout(2000)
         expect(response.ts).toEqual(obj.ts);
         expect(response.category).toEqual(obj.category);
         expect(response.subCategory).toEqual(obj.subCategory);
@@ -116,7 +116,7 @@ describe('DynamoDbStoreWrapper tests', () => {
                         "subCategory": faker.animal.bird(),
                         "images": [ ".sdasd..", "ndasadsadbsjkd"]
                     });
-        await setTimeout(10000)
+        await setTimeout(2000)
         const result = await wrapper.getObj(table, ID);
         expect(result).toEqual(obj);
     }, 30000);
@@ -134,7 +134,7 @@ describe('DynamoDbStoreWrapper tests', () => {
             await wrapper.putObj(table, item);
             items.push(item);  
         }
-        await setTimeout(5000)
+        await setTimeout(2000)
         const result = await wrapper.getObjs(table);
         expect(result.items.length).toEqual(3);
         expect(result.items.toSorted((a, b) => a.category.localeCompare(b.category))).toEqual(items.toSorted((a, b) => a.category.localeCompare(b.category)));
@@ -149,10 +149,10 @@ describe('DynamoDbStoreWrapper tests', () => {
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
         }
         await wrapper.putObj(table, item);
-        await setTimeout(5000)
+        await setTimeout(2000)
         item.category = "test2"
         await wrapper.putObj(table, item);
-        await setTimeout(5000)
+        await setTimeout(2000)
         const result = await wrapper.getObj(table, ID);
         expect(result.category).toEqual("test2");
         expect(result).toEqual(item);
@@ -177,9 +177,9 @@ describe('DynamoDbStoreWrapper tests', () => {
         for(let item of items){
             await wrapper.putObj(table, item);
         }
-        await setTimeout(5000)
+        await setTimeout(2000)
         await wrapper.delObj(table, ID);
-        await setTimeout(5000)
+        await setTimeout(2000)
 
         const result = await wrapper.getObjs(table);
         expect(result.items.length).toEqual(1);
@@ -201,7 +201,7 @@ describe('DynamoDbStoreWrapper tests', () => {
             await wrapper.putObj(table, item);
             items.push(item);  
         }
-        await setTimeout(5000)
+        await setTimeout(2000)
         const result = await wrapper.getObjs(table);
         expect(result.items.length).toEqual(3);
         expect(result.lastKey).not.toEqual(undefined);
@@ -224,7 +224,7 @@ describe('DynamoDbStoreWrapper tests', () => {
             await wrapper.putObj(table, item);
             cats.push(item.category);  
         }
-        await setTimeout(5000)
+        await setTimeout(2000)
         
         const result = await wrapper.getAttributeProjection(table, "category");
         expect(result.length).toEqual(5);
@@ -262,7 +262,7 @@ describe('DynamoDbStoreWrapper tests', () => {
             }
             await wrapper.putObj(table, item);
         }
-        await setTimeout(5000)
+        await setTimeout(2000)
 
         const result = await wrapper.getAttributeProjection(table, "subCategory", {"category": "xpto"});
         expect(result.length).toEqual(2);
@@ -307,7 +307,7 @@ describe('DynamoDbStoreWrapper tests', () => {
             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
         });
 
-        await setTimeout(5000)
+        await setTimeout(2000)
         const expected = {'abcd': ['tty', 'BBB'], 'xpto': ['AAA', 'BBB'], 'xyzw': ['tty']};
         // sort the result before comparing
         const result = await wrapper.getSubAttributeMap(table, "category", "subCategory");

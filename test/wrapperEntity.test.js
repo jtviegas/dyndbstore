@@ -30,7 +30,7 @@ describe('DynamoDbStoreWrapper with SimpleItemEntity tests', () => {
         await wrapper.createTable(table);
         let status = 'CREATING'
         while( 'CREATING' === status ){         
-            await setTimeout(5000)
+            await setTimeout(2000)
             status = await wrapper.getTableStatus(table);
         }
         await setTimeout(10000)
