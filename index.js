@@ -73,7 +73,7 @@ class DynamoDbStore {
         logger.info("[DynamoDbStore|createTable|in] (%s)", table);
 
         const input = {
-            AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }, { AttributeName: 'ts', AttributeType: 'N' }, { AttributeName: 'index_sort', AttributeType: 'N' }],
+            AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }, { AttributeName: 'ts', AttributeType: 'N' }, { AttributeName: 'index_sort', AttributeType: 'S' }],
             TableName: table,
             KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
             GlobalSecondaryIndexes: [
@@ -105,7 +105,7 @@ class DynamoDbStore {
     async postObj (table, obj) {
         logger.info("[DynamoDbStore|postObj|in] (%s, %o)", table, obj);
 
-        obj.index_sort || (obj.index_sort = {"N": "0"})
+        obj.index_sort || (obj.index_sort = {"S": "0"})
         obj.id || (obj.id = {"S": v4()})
 
         const result = await this.putObj(table, obj);
@@ -117,7 +117,7 @@ class DynamoDbStore {
     async putObj (table, obj) {
         logger.info("[DynamoDbStore|putObj|in] (%s, %o)", table, obj);
         
-        obj.index_sort || (obj.index_sort={"N": "0"})
+        obj.index_sort || (obj.index_sort={"S": "0"})
         const input= { 
             "Item": obj,
             "TableName": table, 
@@ -157,7 +157,7 @@ class DynamoDbStore {
             "TableName": table,
             "Limit": this.scanLimit,
             "IndexName": "INDEX_SORT", 
-            "ExpressionAttributeValues": {":a": {"N": "0".toString()}},
+            "ExpressionAttributeValues": {":a": {"S": "0"}},
             "KeyConditionExpression": "index_sort = :a",
             "ScanIndexForward": !desc,
             "ExclusiveStartKey": lastKey || undefined
