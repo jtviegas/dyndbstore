@@ -1,22 +1,8 @@
-const winston = require('winston');
 const { v4 } = require('uuid');
 const { 
     DynamoDBClient, DeleteTableCommand, ListTablesCommand, CreateTableCommand, QueryCommand,
     PutItemCommand, GetItemCommand, ScanCommand, DeleteItemCommand, DescribeTableCommand
 } = require("@aws-sdk/client-dynamodb");
-
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.combine(
-        winston.format.splat(),
-        winston.format.timestamp(),
-        winston.format.printf(info => {
-                return `${info.timestamp} ${info.level}: ${info.message}`;
-            })
-        ),
-    transports: [new winston.transports.Console()],
-    exitOnError: false
-});
 
 class StoreException extends Error {
     constructor(message) {
@@ -38,39 +24,39 @@ class DynamoDbStore {
     }
 
     async dropTable(table) {
-        logger.info("[DynamoDbStore|dropTable|in] (%s)", table);
+        console.info("[DynamoDbStore|dropTable|in] (%s)", table);
         const input = { TableName: table};
         const command = new DeleteTableCommand(input);
         const response = await this.client.send(command);
-        logger.info("[DynamoDbStore|dropTable] response: %o", response);
-        logger.info("[DynamoDbStore|dropTable|out]");
+        console.info("[DynamoDbStore|dropTable] response: %o", response);
+        console.info("[DynamoDbStore|dropTable|out]");
     };
 
     async isTable(table) {
-        logger.info("[DynamoDbStore|isTable|in] (%s)", table);
+        console.info("[DynamoDbStore|isTable|in] (%s)", table);
         const command = new ListTablesCommand({});
         const response = await this.client.send(command);
-        logger.info("[DynamoDbStore|isTable] response: %o", response)
+        console.info("[DynamoDbStore|isTable] response: %o", response)
         const result = 'TableNames' in response ? response["TableNames"].includes(table) : false;
-        logger.info("[DynamoDbStore|isTable|out] => %s", result);
+        console.info("[DynamoDbStore|isTable|out] => %s", result);
         return result
     };
 
     async getTableStatus(name) {
-        logger.info("[DynamoDbStore|getTableStatus|in] (%s)", name);
+        console.info("[DynamoDbStore|getTableStatus|in] (%s)", name);
         const input = {
             "TableName": name
           };
         const command = new DescribeTableCommand(input);
         const response = await this.client.send(command);
-        logger.info("[DynamoDbStore|getTableStatus] response: %o", response)
+        console.info("[DynamoDbStore|getTableStatus] response: %o", response)
         const result = response["Table"]["TableStatus"]
-        logger.info("[DynamoDbStore|getTableStatus|out] => %s", result);
+        console.info("[DynamoDbStore|getTableStatus|out] => %s", result);
         return result
     };
 
     async createTable(table) {
-        logger.info("[DynamoDbStore|createTable|in] (%s)", table);
+        console.info("[DynamoDbStore|createTable|in] (%s)", table);
 
         const input = {
             AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }, { AttributeName: 'ts', AttributeType: 'N' }, { AttributeName: 'index_sort', AttributeType: 'S' }],
@@ -97,25 +83,25 @@ class DynamoDbStore {
         };
         const command = new CreateTableCommand(input);
         const response = await this.client.send(command);
-        logger.info("[DynamoDbStore|createTable] response: %o", response);
+        console.info("[DynamoDbStore|createTable] response: %o", response);
 
-        logger.info("[DynamoDbStore|createTable|out]");
+        console.info("[DynamoDbStore|createTable|out]");
     };
 
     async postObj (table, obj) {
-        logger.info("[DynamoDbStore|postObj|in] (%s, %o)", table, obj);
+        console.info("[DynamoDbStore|postObj|in] (%s, %o)", table, obj);
 
         obj.index_sort || (obj.index_sort = {"S": "0"})
         obj.id || (obj.id = {"S": v4()})
 
         const result = await this.putObj(table, obj);
         delete result.index_sort;
-        logger.info("[DynamoDbStore|postObj|out] (%o)", result)
+        console.info("[DynamoDbStore|postObj|out] (%o)", result)
         return result
     };
 
     async putObj (table, obj) {
-        logger.info("[DynamoDbStore|putObj|in] (%s, %o)", table, obj);
+        console.info("[DynamoDbStore|putObj|in] (%s, %o)", table, obj);
         
         obj.index_sort || (obj.index_sort={"S": "0"})
         const input= { 
@@ -125,18 +111,18 @@ class DynamoDbStore {
           };
         const command = new PutItemCommand(input);
         const response = await this.client.send(command);
-        logger.info("[DynamoDbStore|putObj] (%o)", response)
+        console.info("[DynamoDbStore|putObj] (%o)", response)
         if (0 === response["ConsumedCapacity"]["CapacityUnits"]){
             throw new Error("[DynamoDbStore|putObj|in] no capacity consumed in the operation");
         }
         delete obj.index_sort;
         const result = obj;
-        logger.info("[DynamoDbStore|putObj|out] (%o)", result)
+        console.info("[DynamoDbStore|putObj|out] (%o)", result)
         return result
     };
 
     async getObj (table, key) {
-        logger.info("[DynamoDbStore|getObj|in] (%s, %o)", table, key);
+        console.info("[DynamoDbStore|getObj|in] (%s, %o)", table, key);
         const input= { 
             "TableName": table, 
             "Key": key
@@ -147,12 +133,12 @@ class DynamoDbStore {
             throw new NoEntityStoreException(`[DynamoDbStore|getObj] no entity with key: ${key}`)
         }
         delete response.Item.index_sort;
-        logger.info("[DynamoDbStore|getObj|out] => %o", response);
+        console.info("[DynamoDbStore|getObj|out] => %o", response);
         return response["Item"]
     };
 
     async getObjs(table, lastKey, desc=true) {
-        logger.info("[DynamoDbStore|getObjs|in] (%s, %s, %s)", table, lastKey, desc);
+        console.info("[DynamoDbStore|getObjs|in] (%s, %s, %s)", table, lastKey, desc);
         const input= { 
             "TableName": table,
             "Limit": this.scanLimit,
@@ -162,7 +148,7 @@ class DynamoDbStore {
             "ScanIndexForward": !desc,
             "ExclusiveStartKey": lastKey || undefined
         };
-
+        console.info("[DynamoDbStore|getObjs] input: %O", input);
         const command = new QueryCommand(input);
         const response = await this.client.send(command);
         response.Items.forEach((o) => {
@@ -174,24 +160,24 @@ class DynamoDbStore {
             "lastKey": response.LastEvaluatedKey || undefined
          }
 
-        logger.info("[DynamoDbStore|getObjs|out] => %o", result);
+        console.info("[DynamoDbStore|getObjs|out] => %o", result);
         return result
     };
 
     async delObj (table, key) {
-        logger.info("[DynamoDbStore|delObj|in] (%s, %o)", table, key);
+        console.info("[DynamoDbStore|delObj|in] (%s, %o)", table, key);
         const input= { 
             "TableName": table, 
             "Key": key
           };
         const command = new DeleteItemCommand(input);
         const response = await this.client.send(command);
-        logger.info("[DynamoDbStore|delObj|out] => %o", response);
+        console.info("[DynamoDbStore|delObj|out] => %o", response);
         return response
     };
 
     async getAttributeProjection (table, attribute, filter) {
-        logger.info("[DynamoDbStore|getAttributeProjection|in] (%s, %s, %s)", table, attribute, filter);
+        console.info("[DynamoDbStore|getAttributeProjection|in] (%s, %s, %s)", table, attribute, filter);
         const result = []
         let filterExpression = undefined;
         let expressionAttrValues = undefined;
@@ -214,9 +200,9 @@ class DynamoDbStore {
         let lastEvaluatedKey = "";
         while(lastEvaluatedKey !== undefined){
             const command = new ScanCommand(input);
-            logger.info("[DynamoDbStore|getAttributeProjection] scanning with lastKey: %s", lastEvaluatedKey);
+            console.info("[DynamoDbStore|getAttributeProjection] scanning with lastKey: %O", lastEvaluatedKey);
             const response = await this.client.send(command);
-            logger.info("[DynamoDbStore|getAttributeProjection] response: %o", response);
+            console.info("[DynamoDbStore|getAttributeProjection] response: %o", response);
             lastEvaluatedKey = response.LastEvaluatedKey;
 
             result.push(...response.Items);
@@ -224,12 +210,12 @@ class DynamoDbStore {
                 input.ExclusiveStartKey = lastEvaluatedKey;
             } 
         }
-        logger.info("[DynamoDbStore|getAttributeProjection|out] => %o", result);
+        console.info("[DynamoDbStore|getAttributeProjection|out] => %o", result);
         return result
     };
 
     mapSubAttributes(items, attribute, subAttribute){
-        logger.info("[DynamoDbStore|mapSubAttributes|in] (%o, %s, %s)", items, attribute, subAttribute);
+        console.info("[DynamoDbStore|mapSubAttributes|in] (%o, %s, %s)", items, attribute, subAttribute);
         const mapping = {};
         for(const item of items){
             const attKey = JSON.stringify(item[attribute])
@@ -240,7 +226,7 @@ class DynamoDbStore {
                 (mapping[attKey]).add(item[subAttribute])
             }
         }
-        logger.info("[DynamoDbStore|mapSubAttributes] mapping: %o", mapping);
+        console.info("[DynamoDbStore|mapSubAttributes] mapping: %o", mapping);
         const result = []
         for(const key in mapping){
             const entry = {}
@@ -248,12 +234,12 @@ class DynamoDbStore {
             entry[subAttribute] = [...mapping[key]]
             result.push(entry)
         }
-        logger.info("[DynamoDbStore|mapSubAttributes|out] => %o", result);
+        console.info("[DynamoDbStore|mapSubAttributes|out] => %o", result);
         return result
     }
 
     async getSubAttributeMap (table, attribute, subAttribute) {
-        logger.info("[DynamoDbStore|getSubAttributeMap|in] (%s, %s, %s)", table, attribute, subAttribute);
+        console.info("[DynamoDbStore|getSubAttributeMap|in] (%s, %s, %s)", table, attribute, subAttribute);
         const items = []
 
         const input= { 
@@ -264,9 +250,9 @@ class DynamoDbStore {
         let lastEvaluatedKey = "";
         while(lastEvaluatedKey !== undefined){
             const command = new ScanCommand(input);
-            logger.info("[DynamoDbStore|getSubAttributeMap] scanning with lastKey: %s", lastEvaluatedKey);
+            console.info("[DynamoDbStore|getSubAttributeMap] scanning with lastKey: %O", lastEvaluatedKey);
             const response = await this.client.send(command);
-            logger.info("[DynamoDbStore|getSubAttributeMap] response: %o", response);
+            console.info("[DynamoDbStore|getSubAttributeMap] response: %o", response);
             lastEvaluatedKey = response.LastEvaluatedKey;
 
             items.push(...response.Items);
@@ -275,7 +261,7 @@ class DynamoDbStore {
             } 
         }
         const result = this.mapSubAttributes(items, attribute, subAttribute)
-        logger.info("[DynamoDbStore|getSubAttributeMap|out] => %o", result);
+        console.info("[DynamoDbStore|getSubAttributeMap|out] => %o", result);
         return result
     };
 }
@@ -363,6 +349,19 @@ class SimpleItemEntity extends AbstractSchema {
 
 class DynamoDbStoreWrapper {
 
+    static key2str(key) {
+        return `${key.id.S}#${key.ts.N}`;
+    }
+
+    static str2key(key) {
+        const [id, ts] = key.split('#');
+        return {
+            index_sort: { S: '0' },
+            id: { S: id },
+            ts: { N: ts }
+        };
+    }
+
     constructor(config, schemas) {
         this.store = new DynamoDbStore(config);
         this.schemas = schemas;
@@ -389,81 +388,82 @@ class DynamoDbStoreWrapper {
     }
 
     async getTableStatus(name) {
-        logger.info("[DynamoDbStoreWrapper|getTableStatus|in] (%s)", name);
+        console.info("[DynamoDbStoreWrapper|getTableStatus|in] (%s)", name);
         const result = await this.store.getTableStatus(name);
-        logger.info("[DynamoDbStoreWrapper|getTableStatus|out] => %s", result);
+        console.info("[DynamoDbStoreWrapper|getTableStatus|out] => %s", result);
         return result
     }
 
     async createTable(name) {
-        logger.info("[DynamoDbStoreWrapper|createTable|in] (%s)", name);
+        console.info("[DynamoDbStoreWrapper|createTable|in] (%s)", name);
         await this.store.createTable(name);
-        logger.info("[DynamoDbStoreWrapper|createTable|out]");
+        console.info("[DynamoDbStoreWrapper|createTable|out]");
     }
 
     async dropTable(name) {
-        logger.info("[DynamoDbStoreWrapper|dropTable|in] (%s)", name);
+        console.info("[DynamoDbStoreWrapper|dropTable|in] (%s)", name);
         await this.store.dropTable(name);
-        logger.info("[DynamoDbStoreWrapper|dropTable|out]");
+        console.info("[DynamoDbStoreWrapper|dropTable|out]");
     }
 
     async isTable(name) {
-        logger.info("[DynamoDbStoreWrapper|isTable|in] (%s)", name);
+        console.info("[DynamoDbStoreWrapper|isTable|in] (%s)", name);
         const result = await this.store.isTable(name);
-        logger.info("[DynamoDbStoreWrapper|isTable|out] => %s", result);
+        console.info("[DynamoDbStoreWrapper|isTable|out] => %s", result);
         return result
     }
 
     async postObj (table, obj) {
-        logger.info("[DynamoDbStoreWrapper|postObj|in] (%s, %o)", table, obj);
+        console.info("[DynamoDbStoreWrapper|postObj|in] (%s, %o)", table, obj);
         const schema = this.getSchema(this.getTableSuffix(table))
         const response = await this.store.postObj(table, schema.toEntity(obj));
         const result = schema.fromEntity(response);
-        logger.info("[DynamoDbStoreWrapper|postObj|out] (%o)", result)
+        console.info("[DynamoDbStoreWrapper|postObj|out] (%o)", result)
         return result
     };
 
     async putObj (table, obj) {
-        logger.info("[DynamoDbStoreWrapper|putObj|in] (%s, %o)", table, obj);
+        console.info("[DynamoDbStoreWrapper|putObj|in] (%s, %o)", table, obj);
         const schema = this.getSchema(this.getTableSuffix(table))
         const response = await this.store.putObj(table, schema.toEntity(obj));
         const result = schema.fromEntity(response);
-        logger.info("[DynamoDbStoreWrapper|putObj|out] (%o)", result)
+        console.info("[DynamoDbStoreWrapper|putObj|out] (%o)", result)
         return result
     };
 
     async getObj (table, id) {
-        logger.info("[DynamoDbStoreWrapper|getObj|in] (%s, %s)", table, id);
+        console.info("[DynamoDbStoreWrapper|getObj|in] (%s, %s)", table, id);
         const schema = this.getSchema(this.getTableSuffix(table))
         const response = await this.store.getObj(table, {"id": {"S": id}});
         const result = schema.fromEntity(response)
-        logger.info("[DynamoDbStoreWrapper|getObj|out] => %o", result);
+        console.info("[DynamoDbStoreWrapper|getObj|out] => %o", result);
         return result
     };
 
     async getObjs (table, lastKey) {
-        logger.info("[DynamoDbStoreWrapper|getObjs|in] (%s, %s)", table, lastKey);
+        console.info("[DynamoDbStoreWrapper|getObjs|in] (%s, %s)", table, lastKey);
         const schema = this.getSchema(this.getTableSuffix(table))
-        const response = await this.store.getObjs(table, lastKey);
+        const lastKeyArg = lastKey ? DynamoDbStoreWrapper.str2key(lastKey) : undefined;
+        const response = await this.store.getObjs(table, lastKeyArg);
         const result = {
-            "lastKey": response.lastKey,
+            "lastKey": response.lastKey ? DynamoDbStoreWrapper.key2str(response.lastKey) : undefined,
             "items": []
         }
         for(const item of response.items){
             result.items.push(schema.fromEntity(item))
         }
-        logger.info("[DynamoDbStoreWrapper|getObjs|out] => %o", result);
+        console.info("[DynamoDbStoreWrapper|getObjs|out] => %o", result);
         return result
     };
 
     async delObj (table, id) {
-        logger.info("[DynamoDbStoreWrapper|delObj|in] (%s, %s)", table, id);
+        console.info("[DynamoDbStoreWrapper|delObj|in] (%s, %s)", table, id);
         const response = await this.store.delObj(table, {"id": {"S": id}});
-        logger.info("[DynamoDbStoreWrapper|delObj|out] => %o", response);
+        console.info("[DynamoDbStoreWrapper|delObj|out] => %o", response);
     };
 
     async getAttributeProjection (table, attribute, filter) {
-        logger.info("[DynamoDbStoreWrapper|getAttributeProjection|in] (%s, %s, %s)", table, attribute, filter);
+        console.info("[DynamoDbStoreWrapper|getAttributeProjection|in] (%s, %s, %s)", table, attribute, filter);
         const result = []
         const schema = this.getSchema(this.getTableSuffix(table));
         let filterWrapper = undefined
@@ -479,12 +479,12 @@ class DynamoDbStoreWrapper {
         for(const entry of response){
             result.push(entry[attribute][attrType]);
         }
-        logger.info("[DynamoDbStoreWrapper|getAttributeProjection|out] => %o", result);
+        console.info("[DynamoDbStoreWrapper|getAttributeProjection|out] => %o", result);
         return result
     };
 
     async getSubAttributeMap (table, attribute, subAttribute) {
-        logger.info("[DynamoDbStoreWrapper|getSubAttributeMap|in] (%s, %s, %s)", table, attribute, subAttribute);
+        console.info("[DynamoDbStoreWrapper|getSubAttributeMap|in] (%s, %s, %s)", table, attribute, subAttribute);
         const result = {}
         const schema = this.getSchema(this.getTableSuffix(table));
         
@@ -499,7 +499,7 @@ class DynamoDbStoreWrapper {
             }
             result[attrValue] = subAttrValues;
         }
-        logger.info("[DynamoDbStoreWrapper|getSubAttributeMap|out] => %o", result);
+        console.info("[DynamoDbStoreWrapper|getSubAttributeMap|out] => %o", result);
         return result
     };
 

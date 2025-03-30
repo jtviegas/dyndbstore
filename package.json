@@ -1,6 +1,6 @@
 {
   "name": "@jtviegas/dyndbstore",
-  "version": "3.3.1",
+  "version": "3.4.0",
   "description": "store facade to a database, currently only DynamoDb implementation",
   "main": "index.js",
   "scripts": {
@@ -20,15 +20,14 @@
     "javascript",
     "nodejs"
   ],
-  "author": "Joao Tiago Viegas <jtviegas.js@gmail.com>",
-  "license": "ISC",
+  "author": "Joao Tiago Viegas <jtviegas@gmail.com>",
+  "license": "Unlicense",
   "bugs": {
     "url": "https://github.com/jtviegas/dyndbstore/issues"
   },
   "homepage": "https://github.com/jtviegas/dyndbstore#readme",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.741.0",
-    "winston": "^3.17.0"
+    "@aws-sdk/client-dynamodb": "^3.741.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",
