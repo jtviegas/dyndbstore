@@ -64,128 +64,128 @@ describe('DynamoDbStoreWrapper tests', () => {
         await setTimeout(2000)
     }, 50000);
 
-    // it('should check creation and deletion of table', async () => {
-    //     let isTableResult = await wrapper.isTable(table);
-    //     expect(isTableResult).toEqual(true);
-    //     await wrapper.dropTable(table);
-    //     isTableResult = await wrapper.isTable(table);
-    //     expect(isTableResult).toEqual(false);
-    // }, 30000);
+    it('should check creation and deletion of table', async () => {
+        let isTableResult = await wrapper.isTable(table);
+        expect(isTableResult).toEqual(true);
+        await wrapper.dropTable(table);
+        isTableResult = await wrapper.isTable(table);
+        expect(isTableResult).toEqual(false);
+    }, 30000);
 
-    // it('should put an item', async () => {
-    //     const obj = {
-    //         "id": ID,
-    //         "ts": TS,
-    //         "category": faker.vehicle.model(),
-    //         "subCategory": faker.animal.bird(),
-    //         "images": [ "...", "ndbsjkd"]
-    //     }
-    //     const result = await wrapper.putObj(table, obj);
-    //     expect(result).toEqual(obj);
-    // }, 30000);
+    it('should put an item', async () => {
+        const obj = {
+            "id": ID,
+            "ts": TS,
+            "category": faker.vehicle.model(),
+            "subCategory": faker.animal.bird(),
+            "images": [ "...", "ndbsjkd"]
+        }
+        const result = await wrapper.putObj(table, obj);
+        expect(result).toEqual(obj);
+    }, 30000);
 
-    // it('should post a new item', async () => {
-    //     const obj = {
-    //         "ts": TS,
-    //         "category": faker.vehicle.model(),
-    //         "subCategory": faker.animal.bird(),
-    //         "images": [ "...", "ndbsjkd"]
-    //     }
-    //     const response = await wrapper.postObj(table, obj);
-    //     await setTimeout(2000)
-    //     expect(response.ts).toEqual(obj.ts);
-    //     expect(response.category).toEqual(obj.category);
-    //     expect(response.subCategory).toEqual(obj.subCategory);
-    //     expect(response.images).toEqual(obj.images);
+    it('should post a new item', async () => {
+        const obj = {
+            "ts": TS,
+            "category": faker.vehicle.model(),
+            "subCategory": faker.animal.bird(),
+            "images": [ "...", "ndbsjkd"]
+        }
+        const response = await wrapper.postObj(table, obj);
+        await setTimeout(2000)
+        expect(response.ts).toEqual(obj.ts);
+        expect(response.category).toEqual(obj.category);
+        expect(response.subCategory).toEqual(obj.subCategory);
+        expect(response.images).toEqual(obj.images);
 
-    // }, 30000);
+    }, 30000);
 
-    // it('should get a specific item', async () => {
-    //     const obj = {
-    //         "id": ID,
-    //         "ts": TS,
-    //         "category": faker.vehicle.model(),
-    //         "subCategory": faker.animal.bird(),
-    //         "images": [ "...", "ndbsjkd"]
-    //     }
-    //     await wrapper.putObj(table, obj);
-    //     await wrapper.putObj(table, {
-    //                     "id": faker.string.uuid(),
-    //                     "ts": TS,
-    //                     "category": faker.vehicle.model(),
-    //                     "subCategory": faker.animal.bird(),
-    //                     "images": [ ".sdasd..", "ndasadsadbsjkd"]
-    //                 });
-    //     await setTimeout(2000)
-    //     const result = await wrapper.getObj(table, ID);
-    //     expect(result).toEqual(obj);
-    // }, 30000);
+    it('should get a specific item', async () => {
+        const obj = {
+            "id": ID,
+            "ts": TS,
+            "category": faker.vehicle.model(),
+            "subCategory": faker.animal.bird(),
+            "images": [ "...", "ndbsjkd"]
+        }
+        await wrapper.putObj(table, obj);
+        await wrapper.putObj(table, {
+                        "id": faker.string.uuid(),
+                        "ts": TS,
+                        "category": faker.vehicle.model(),
+                        "subCategory": faker.animal.bird(),
+                        "images": [ ".sdasd..", "ndasadsadbsjkd"]
+                    });
+        await setTimeout(2000)
+        const result = await wrapper.getObj(table, ID);
+        expect(result).toEqual(obj);
+    }, 30000);
 
-    // it('should get all items', async () => {
-    //     const items = []
-    //     for(let i=0; i<3; i++){
-    //         let item = {
-    //             "id": faker.string.uuid(),
-    //             "ts": TS,
-    //             "category": faker.vehicle.model(),
-    //             "subCategory": faker.animal.bird(),
-    //             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
-    //         }
-    //         await wrapper.putObj(table, item);
-    //         items.push(item);  
-    //     }
-    //     await setTimeout(2000)
-    //     const result = await wrapper.getObjs(table);
-    //     expect(result.items.length).toEqual(3);
-    //     expect(result.items.toSorted((a, b) => a.category.localeCompare(b.category))).toEqual(items.toSorted((a, b) => a.category.localeCompare(b.category)));
-    // }, 30000);
+    it('should get all items', async () => {
+        const items = []
+        for(let i=0; i<3; i++){
+            let item = {
+                "id": faker.string.uuid(),
+                "ts": TS,
+                "category": faker.vehicle.model(),
+                "subCategory": faker.animal.bird(),
+                "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+            }
+            await wrapper.putObj(table, item);
+            items.push(item);  
+        }
+        await setTimeout(2000)
+        const result = await wrapper.getObjs(table);
+        expect(result.items.length).toEqual(3);
+        expect(result.items.toSorted((a, b) => a.category.localeCompare(b.category))).toEqual(items.toSorted((a, b) => a.category.localeCompare(b.category)));
+    }, 30000);
 
-    // it('should update a specific item', async () => {
-    //     const item = {
-    //         "id": ID,
-    //         "ts": TS,
-    //         "category": faker.vehicle.model(),
-    //         "subCategory": faker.animal.bird(),
-    //         "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
-    //     }
-    //     await wrapper.putObj(table, item);
-    //     await setTimeout(2000)
-    //     item.category = "test2"
-    //     await wrapper.putObj(table, item);
-    //     await setTimeout(2000)
-    //     const result = await wrapper.getObj(table, ID);
-    //     expect(result.category).toEqual("test2");
-    //     expect(result).toEqual(item);
-    // }, 30000);
+    it('should update a specific item', async () => {
+        const item = {
+            "id": ID,
+            "ts": TS,
+            "category": faker.vehicle.model(),
+            "subCategory": faker.animal.bird(),
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        }
+        await wrapper.putObj(table, item);
+        await setTimeout(2000)
+        item.category = "test2"
+        await wrapper.putObj(table, item);
+        await setTimeout(2000)
+        const result = await wrapper.getObj(table, ID);
+        expect(result.category).toEqual("test2");
+        expect(result).toEqual(item);
+    }, 30000);
 
-    // it('should delete a specific item', async () => {
-    //     const ID2 = faker.string.uuid();
-    //     const items = [
-    //         {"id": ID,
-    //         "ts": TS,
-    //         "category": faker.vehicle.model(),
-    //         "subCategory": faker.animal.bird(),
-    //         "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
-    //         },
-    //         {"id": ID2,
-    //         "ts": TS,
-    //         "category": faker.vehicle.model(),
-    //         "subCategory": faker.animal.bird(),
-    //         "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
-    //         }
-    //     ];
-    //     for(let item of items){
-    //         await wrapper.putObj(table, item);
-    //     }
-    //     await setTimeout(2000)
-    //     await wrapper.delObj(table, ID);
-    //     await setTimeout(2000)
+    it('should delete a specific item', async () => {
+        const ID2 = faker.string.uuid();
+        const items = [
+            {"id": ID,
+            "ts": TS,
+            "category": faker.vehicle.model(),
+            "subCategory": faker.animal.bird(),
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+            },
+            {"id": ID2,
+            "ts": TS,
+            "category": faker.vehicle.model(),
+            "subCategory": faker.animal.bird(),
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+            }
+        ];
+        for(let item of items){
+            await wrapper.putObj(table, item);
+        }
+        await setTimeout(2000)
+        await wrapper.delObj(table, ID);
+        await setTimeout(2000)
 
-    //     const result = await wrapper.getObjs(table);
-    //     expect(result.items.length).toEqual(1);
-    //     expect(result.items[0].id).toEqual(ID2);
+        const result = await wrapper.getObjs(table);
+        expect(result.items.length).toEqual(1);
+        expect(result.items[0].id).toEqual(ID2);
 
-    // }, 30000);
+    }, 30000);
 
     it('should paginate items', async () => {
     
@@ -210,115 +210,115 @@ describe('DynamoDbStoreWrapper tests', () => {
         expect(result.items).toEqual(expect.not.arrayContaining(result2.items));
     }, 30000);
 
-    // it('should get some kind of projection', async() => {
+    it('should get some kind of projection', async() => {
 
-    //     const cats = []
-    //     for(let i=0; i<5; i++){ 
-    //         let item = {
-    //             "id": faker.string.uuid(),
-    //             "ts": TS,
-    //             "category": faker.vehicle.model(),
-    //             "subCategory": faker.animal.bird(),
-    //             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
-    //         }
-    //         await wrapper.putObj(table, item);
-    //         cats.push(item.category);  
-    //     }
-    //     await setTimeout(2000)
+        const cats = []
+        for(let i=0; i<5; i++){ 
+            let item = {
+                "id": faker.string.uuid(),
+                "ts": TS,
+                "category": faker.vehicle.model(),
+                "subCategory": faker.animal.bird(),
+                "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+            }
+            await wrapper.putObj(table, item);
+            cats.push(item.category);  
+        }
+        await setTimeout(2000)
         
-    //     const result = await wrapper.getAttributeProjection(table, "category");
-    //     expect(result.length).toEqual(5);
-    //     expect(result.toSorted((a, b) => a.localeCompare(b))).toEqual(cats.toSorted((a, b) => a.localeCompare(b)));
+        const result = await wrapper.getAttributeProjection(table, "category");
+        expect(result.length).toEqual(5);
+        expect(result.toSorted((a, b) => a.localeCompare(b))).toEqual(cats.toSorted((a, b) => a.localeCompare(b)));
 
-    // }, 60000);
+    }, 60000);
 
-    // it('should get some kind of projection with a filter', async () => {
+    it('should get some kind of projection with a filter', async () => {
 
 
-    //     await wrapper.putObj(table, {
-    //         "id": faker.string.uuid(),
-    //         "ts": TS,
-    //         "category": "xpto",
-    //         "subCategory": "AAA",
-    //         "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
-    //     });
-    //     await wrapper.putObj(table, {
-    //         "id": faker.string.uuid(),
-    //         "ts": TS,
-    //         "category": "xpto",
-    //         "subCategory": "BBB",
-    //         "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
-    //     });
+        await wrapper.putObj(table, {
+            "id": faker.string.uuid(),
+            "ts": TS,
+            "category": "xpto",
+            "subCategory": "AAA",
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        });
+        await wrapper.putObj(table, {
+            "id": faker.string.uuid(),
+            "ts": TS,
+            "category": "xpto",
+            "subCategory": "BBB",
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        });
 
-    //     const subcats = ['BBB', 'AAA'];
+        const subcats = ['BBB', 'AAA'];
 
-    //     for(let i=0; i<3; i++){
-    //         let item = {
-    //             "id": faker.string.uuid(),
-    //             "ts": TS,
-    //             "category": faker.vehicle.model(),
-    //             "subCategory": faker.animal.bird(),
-    //             "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
-    //         }
-    //         await wrapper.putObj(table, item);
-    //     }
-    //     await setTimeout(2000)
+        for(let i=0; i<3; i++){
+            let item = {
+                "id": faker.string.uuid(),
+                "ts": TS,
+                "category": faker.vehicle.model(),
+                "subCategory": faker.animal.bird(),
+                "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+            }
+            await wrapper.putObj(table, item);
+        }
+        await setTimeout(2000)
 
-    //     const result = await wrapper.getAttributeProjection(table, "subCategory", {"category": "xpto"});
-    //     expect(result.length).toEqual(2);
-    //     expect(subcats).toEqual(expect.arrayContaining(result));
-    // }, 60000);
+        const result = await wrapper.getAttributeProjection(table, "subCategory", {"category": "xpto"});
+        expect(result.length).toEqual(2);
+        expect(subcats).toEqual(expect.arrayContaining(result));
+    }, 60000);
 
-    // it('should get the subAttribute map', async () => {
+    it('should get the subAttribute map', async () => {
 
-    //     await wrapper.putObj(table, {
-    //         "id": faker.string.uuid(),
-    //         "ts": TS,
-    //         "category": "xpto",
-    //         "subCategory": "AAA",
-    //         "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
-    //     });
-    //     await wrapper.putObj(table, {
-    //         "id": faker.string.uuid(),
-    //         "ts": TS,
-    //         "category": "xpto",
-    //         "subCategory":  "BBB",
-    //         "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
-    //     });
-    //     await wrapper.putObj(table, {
-    //         "id": faker.string.uuid(),
-    //         "ts": TS,
-    //         "category": "abcd",
-    //         "subCategory": "BBB",
-    //         "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
-    //     });
-    //     await wrapper.putObj(table, {
-    //         "id": faker.string.uuid(),
-    //         "ts": TS,
-    //         "category": "abcd",
-    //         "subCategory":  "tty",
-    //         "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
-    //     });
-    //     await wrapper.putObj(table, {
-    //         "id": faker.string.uuid(),
-    //         "ts": TS,
-    //         "category": "xyzw",
-    //         "subCategory":  "tty",
-    //         "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
-    //     });
+        await wrapper.putObj(table, {
+            "id": faker.string.uuid(),
+            "ts": TS,
+            "category": "xpto",
+            "subCategory": "AAA",
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        });
+        await wrapper.putObj(table, {
+            "id": faker.string.uuid(),
+            "ts": TS,
+            "category": "xpto",
+            "subCategory":  "BBB",
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        });
+        await wrapper.putObj(table, {
+            "id": faker.string.uuid(),
+            "ts": TS,
+            "category": "abcd",
+            "subCategory": "BBB",
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        });
+        await wrapper.putObj(table, {
+            "id": faker.string.uuid(),
+            "ts": TS,
+            "category": "abcd",
+            "subCategory":  "tty",
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        });
+        await wrapper.putObj(table, {
+            "id": faker.string.uuid(),
+            "ts": TS,
+            "category": "xyzw",
+            "subCategory":  "tty",
+            "images": [faker.image.dataUri({ type: 'svg-base64', height: 30, width: 30 })]
+        });
 
-    //     await setTimeout(2000)
-    //     const expected = {'abcd': ['tty', 'BBB'], 'xpto': ['AAA', 'BBB'], 'xyzw': ['tty']};
-    //     // sort the result before comparing
-    //     const result = await wrapper.getSubAttributeMap(table, "category", "subCategory");
-    //     for(key in result){
-    //         subs = result[key]
-    //         result[key] = subs.toSorted((a, b) => a.localeCompare(b));
-    //         expect(result[key]).toEqual(expect.arrayContaining(expected[key]));
-    //     }
-    //     expect(Object.keys(result).length).toEqual(3);
-    //     expect(Object.keys(expected)).toEqual(expect.arrayContaining(Object.keys(result)));
-    // }, 60000);
+        await setTimeout(2000)
+        const expected = {'abcd': ['tty', 'BBB'], 'xpto': ['AAA', 'BBB'], 'xyzw': ['tty']};
+        // sort the result before comparing
+        const result = await wrapper.getSubAttributeMap(table, "category", "subCategory");
+        for(key in result){
+            subs = result[key]
+            result[key] = subs.toSorted((a, b) => a.localeCompare(b));
+            expect(result[key]).toEqual(expect.arrayContaining(expected[key]));
+        }
+        expect(Object.keys(result).length).toEqual(3);
+        expect(Object.keys(expected)).toEqual(expect.arrayContaining(Object.keys(result)));
+    }, 60000);
 
 })
 
